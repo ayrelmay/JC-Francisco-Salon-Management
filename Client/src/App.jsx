@@ -7,6 +7,7 @@ import Services from "./pages/Services";
 import Appointment from "./pages/Appointment";
 import Inventory from "./pages/Inventory";
 import InvoiceHistory from "./pages/InvoiceHistory";
+import Accounts from "./pages/Accounts";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="Appointment" element={<Appointment />} />
           <Route path="Inventory" element={<Inventory />} />
           <Route path="InvoiceHistory" element={<InvoiceHistory />} />
+          <Route path="Accounts" element={<Accounts />} />
         </Route>
       </Routes>
     </BrowserRouter>
