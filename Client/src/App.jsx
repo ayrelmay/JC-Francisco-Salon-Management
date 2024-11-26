@@ -1,14 +1,21 @@
 import "./App.css";
-//import LandingPage from "./components/LandingPage";
-//import Login from "./components/login";
-import Navbar from "./ui/Navbar";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import Applayout from "./ui/applayout";
+import Dashbaord from "./pages/Dashboard";
+import Payment from "./pages/Paymnet";
+import Services from "./pages/Services";
 
 function App() {
   return (
     <BrowserRouter>
-      <Navbar /> {/* Make sure Navbar is rendered here */}
-      {/* Your other components go here */}
+      <Routes>
+        <Route element={<Applayout />}>
+          <Route index element={<Navigate replace to="Dashboard" />} />
+          <Route path="dashboard" element={<Dashbaord />} />
+          <Route path="payment" element={<Payment />} />
+          <Route path="Services" element={<Services />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }
