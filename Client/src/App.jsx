@@ -4,6 +4,7 @@ import Applayout from "./ui/applayout";
 import Dashbaord from "./pages/Dashboard";
 import Payment from "./pages/Paymnet";
 import Services from "./pages/Services";
+import Appointment from "./pages/Appointment";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="dashboard" element={<Dashbaord />} />
           <Route path="payment" element={<Payment />} />
           <Route path="Services" element={<Services />} />
+          <Route path="Appointment" element={<Appointment />} />
         </Route>
       </Routes>
     </BrowserRouter>
