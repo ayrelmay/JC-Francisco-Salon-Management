@@ -5,7 +5,7 @@ import Dashbaord from "./pages/Dashboard";
 import Payment from "./pages/Paymnet";
 import Services from "./pages/Services";
 import Appointment from "./pages/Appointment";
-//import Inventory from "./pages/Inventory";
+import Inventory from "./pages/Inventory";
 import InvoiceHistory from "./pages/InvoiceHistory";
 
 function App() {
@@ -18,6 +18,7 @@ function App() {
           <Route path="payment" element={<Payment />} />
           <Route path="Services" element={<Services />} />
           <Route path="Appointment" element={<Appointment />} />
+          <Route path="Inventory" element={<Inventory />} />
           <Route path="InvoiceHistory" element={<InvoiceHistory />} />
         </Route>
       </Routes>
