@@ -16,7 +16,7 @@ const navItems = [
   { name: "Services", icon: Briefcase, path: "/services" },
   { name: "Appointment", icon: Calendar, path: "/appointment" },
   { name: "Inventory", icon: Package, path: "/inventory" },
-  { name: "Invoice History", icon: FileText, path: "/invoice-history" },
+  { name: "InvoiceHistory", icon: FileText, path: "/InvoiceHistory" },
   { name: "Accounts", icon: Users, path: "/accounts" },
 ];
 
