@@ -1,13 +1,13 @@
 import "./App.css";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Applayout from "./ui/applayout";
-import Dashbaord from "./pages/Dashboard";
-import Payment from "./pages/Paymnet";
-import Services from "./pages/Services";
-import Appointment from "./pages/Appointment";
-import Inventory from "./pages/Inventory";
-import InvoiceHistory from "./pages/InvoiceHistory";
-import Accounts from "./pages/Accounts";
+import Dashbaord from "./pages/Admin/Dashboard";
+import Payment from "./pages/Admin/Paymnet";
+import Services from "./pages/Admin/Services";
+import Appointment from "./pages/Admin/Appointment";
+import Inventory from "./pages/Admin/Inventory";
+import InvoiceHistory from "./pages/Admin/InvoiceHistory";
+import Accounts from "./pages/Admin/Accounts";
 
 function App() {
   return (

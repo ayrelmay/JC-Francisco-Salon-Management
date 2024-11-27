@@ -1,11 +1,11 @@
 "use client";
 
-import Card from "../components/Card";
-import MetricCard from "../components/MetriCard";
-import Table from "../components/Table";
-import TableCell from "../components/TableCell";
-import TableHead from "../components/TableHead";
-import TableHeader from "../components/TableHeader";
+import Card from "../../components/Admin/Card";
+import MetricCard from "../../components/Admin/MetriCard";
+import Table from "../../components/Admin/Table";
+import TableCell from "../../components/Admin/TableCell";
+import TableHead from "../../components/Admin/TableHead";
+import TableHeader from "../../components/Admin/TableHeader";
 import { BellIcon } from "lucide-react";
 import {
   BarChart,
