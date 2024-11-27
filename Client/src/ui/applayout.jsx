@@ -1,12 +1,12 @@
 import { Outlet } from "react-router-dom";
-import Navbar from "./Navbar";
+import AdminSidebar from "./AdminSidebar";
 
 export default function AppLayout() {
   return (
     <div className="flex h-screen w-screen bg-gray-50 overflow-hidden">
       {/* Sidebar */}
       <aside className="hidden md:block w-64 bg-white">
-        <Navbar />
+        <AdminSidebar />
       </aside>
 
       {/* Main Content */}
