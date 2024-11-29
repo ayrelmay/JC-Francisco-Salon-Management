@@ -18,6 +18,7 @@ export default {
       BtnFocus: "#B1BCD2",
       Tableline: "#667085",
       Blue: "#667085",
+      white: "#ffffff",
     },
     fontFamily: {
       sans: ["Poppins", "monospace"],
