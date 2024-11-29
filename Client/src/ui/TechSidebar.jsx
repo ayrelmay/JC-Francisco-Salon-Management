@@ -50,7 +50,7 @@ export default function TechSidebar() {
       <div className="p-4">
         <button className="flex items-center gap-3 px-3 py-2 text-sm text-FontPrimary hover:bg-gray-100 rounded-lg transition-colors w-full">
           <LogOut className="w-5 h-5" />
-          Logout
+          Tech
         </button>
       </div>
     </div>
