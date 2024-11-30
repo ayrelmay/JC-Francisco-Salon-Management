@@ -27,11 +27,14 @@ db.connect((err) => {
   }
 });
 
-// Example API route
-app.get("/api/users", (req, res) => {
-  db.query("SELECT * FROM users", (err, results) => {
+//API route
+app.get("/api/service", (req, res) => {
+  const query = "SELECT * FROM service";
+  db.query(query, (err, results) => {
     if (err) {
-      return res.status(500).send(err);
+      console.error("Error fetching departments:", err);
+      res.status(500).json({ error: "Failed to fetch data" });
+      return;
     }
     res.json(results);
   });

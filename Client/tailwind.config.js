@@ -19,6 +19,7 @@ export default {
       Tableline: "#667085",
       Blue: "#667085",
       white: "#ffffff",
+      gray: "#667085",
     },
     fontFamily: {
       sans: ["Poppins", "monospace"],

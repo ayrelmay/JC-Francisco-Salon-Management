@@ -1,0 +1,167 @@
+import PrimaryBtn from "../Global/PrimaryBtn";
+import TertiaryBtn from "../Global/TertiaryBtn";
+import { HandPlatter, X } from "lucide-react";
+import { useState } from "react";
+import PropTypes from "prop-types";
+
+export default function AddServiceModal({ onClose, onConfirm }) {
+  const [formData, setFormData] = useState({
+    serviceName: "",
+    category: "",
+    serviceId: "SRV-1001",
+    minimumPrice: "",
+    duration: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onConfirm(formData);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
+      <div className="bg-white rounded-[12px] shadow-lg w-full max-w-md p-6">
+        {/* Modal content */}
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <HandPlatter className="text-FontPrimary border border-gray rounded-[4px]  border-opacity-50 w-11 h-11 p-[8px]" />
+              <div>
+                <h2 className="text-left text-l font-semibold text-FontPrimary">
+                  Add New Service
+                </h2>
+                <p className="text-sm text-gray leading-relaxed">
+                  Fill in the details. <span className="text-red-500">*</span>{" "}
+                  Required fields.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray hover:text-gray-700 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          <div className="-mx-6">
+            <hr className="border-t border-Tableline opacity-50" />
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-font-gray mb-2 text-left">
+                Service name<span className="text-red-500"> *</span>
+              </label>
+              <input
+                type="text"
+                name="serviceName"
+                placeholder="e.g. Hair color"
+                required
+                className="w-full px-4 py-2 text-sm border border-Tableline border-opacity-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={formData.serviceName}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-font-gray mb-2 text-left">
+                Category<span className="text-red-500"> *</span>
+              </label>
+              <select
+                name="category"
+                required
+                className="w-full px-4 py-2 text-sm border border-Tableline border-opacity-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+                value={formData.category}
+                onChange={handleChange}
+              >
+                <option value="">Choose a category</option>
+                <option value="hair">Hair</option>
+                <option value="nails">Nails</option>
+                <option value="skin">Skin</option>
+                <option value="massage">Massage</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-font-gray mb-2 text-left">
+                Service ID<span className="text-red-500"> *</span>
+              </label>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  name="serviceId"
+                  required
+                  className="w-full px-4 py-2 text-sm border border-Tableline border-opacity-50 rounded-lg bg-gray-50 focus:outline-none"
+                  value={formData.serviceId}
+                  readOnly
+                />
+                <span className="inline-flex items-center px-3 text-xs text-font-grey bg-gray-100 border border-Tableline border-opacity-50 rounded-lg">
+                  Auto
+                </span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-font-gray mb-2 text-left">
+                Minimum Price<span className="text-red-500"> *</span>
+              </label>
+              <div className="flex gap-3">
+                <input
+                  type="number"
+                  name="minimumPrice"
+                  placeholder="Enter minimum price"
+                  required
+                  className="w-full px-4 py-2 text-sm border border-Tableline border-opacity-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.minimumPrice}
+                  onChange={handleChange}
+                />
+                <span className="inline-flex items-center px-3 text-xs text-font-grey bg-gray-100 border border-Tableline border-opacity-50 rounded-lg">
+                  PHP
+                </span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-font-gray mb-2 text-left">
+                Duration<span className="text-red-500"> *</span>
+              </label>
+              <input
+                type="text"
+                name="duration"
+                placeholder="e.g. 3 hours"
+                required
+                className="w-full px-4 py-2 text-sm border border-Tableline border-opacity-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={formData.duration}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="-mx-6 pt-2 ">
+              <hr className="border-t border-Tableline opacity-50" />
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-4 pt-2 -mx-6 px-6">
+              <TertiaryBtn type="button" onClick={onClose}>
+                Cancel
+              </TertiaryBtn>
+              <PrimaryBtn type="submit">Confirm</PrimaryBtn>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+AddServiceModal.propTypes = {
+  onClose: PropTypes.func.isRequired, // Required function to handle modal closing
+  onConfirm: PropTypes.func.isRequired, // Required function to handle confirmation
+};
