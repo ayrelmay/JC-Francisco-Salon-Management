@@ -1,17 +1,52 @@
 const express = require("express");
-const db = require("../db");
+const db = require("../db"); // Import the database connection
 
-const router = express.Router(); // Create a router instance
+const router = express.Router();
 
 // Fetch all services
 router.get("/", async (req, res) => {
   try {
-    const [results] = await db.query("SELECT * FROM service");
-    res.json(results);
+    const [services] = await db.query("SELECT * FROM service");
+    res.status(200).json(services);
   } catch (err) {
-    console.error("Error fetching services:", err);
-    res.status(500).json({ error: "Failed to fetch services" });
+    console.error("Error fetching services:", err.message);
+    res.status(500).json({ error: "Failed to retrieve services" });
   }
 });
 
-module.exports = router; // Export the router
+// Fetch the next Service ID
+router.get("/next-id", async (req, res) => {
+  try {
+    const [lastService] = await db.query(
+      "SELECT Id FROM service ORDER BY Id DESC LIMIT 1"
+    );
+    const lastId = lastService.length > 0 ? lastService[0].Id : "SRV1000";
+    const nextId = `SRV${String(
+      parseInt(lastId.split("-")[1], 10) + 1
+    ).padStart(4, "0")}`;
+    res.status(200).json({ nextId });
+  } catch (err) {
+    console.error("Error fetching next Service ID:", err.message);
+    res.status(500).json({ error: "Failed to fetch next Service ID" });
+  }
+});
+
+// Add a new service
+router.post("/", async (req, res) => {
+  const { ServiceName, ServicePrice, Duration, Category } = req.body;
+  try {
+    const [result] = await db.query(
+      "INSERT INTO service (ServiceName, ServicePrice, Duration, Category) VALUES (?, ?, ?, ?)",
+      [ServiceName, ServicePrice, Duration, Category]
+    );
+    res.status(201).json({
+      message: "Service added successfully",
+      serviceId: result.insertId,
+    });
+  } catch (err) {
+    console.error("Error adding service:", err.message);
+    res.status(500).json({ error: "Failed to add service" });
+  }
+});
+
+module.exports = router;

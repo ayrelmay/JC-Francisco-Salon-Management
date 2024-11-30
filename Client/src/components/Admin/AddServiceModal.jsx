@@ -1,18 +1,48 @@
+import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import PrimaryBtn from "../Global/PrimaryBtn";
 import TertiaryBtn from "../Global/TertiaryBtn";
 import { HandPlatter, X } from "lucide-react";
-import { useState } from "react";
-import PropTypes from "prop-types";
 
 export default function AddServiceModal({ onClose, onConfirm }) {
   const [formData, setFormData] = useState({
     serviceName: "",
     category: "",
-    serviceId: "SRV-1001",
+    serviceId: "Loading...", // Initial state for dynamic Service ID
     minimumPrice: "",
     duration: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
+  // Fetch the next available Service ID
+  useEffect(() => {
+    const fetchNextServiceId = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/service/next-id"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch Service ID");
+        }
+        const data = await response.json();
+        setFormData((prev) => ({
+          ...prev,
+          serviceId: data.nextId, // Update Service ID dynamically
+        }));
+      } catch (error) {
+        console.error("Error fetching Service ID:", error);
+        setFormData((prev) => ({
+          ...prev,
+          serviceId: "Error generating ID",
+        }));
+      }
+    };
+
+    fetchNextServiceId();
+  }, []);
+
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -21,20 +51,50 @@ export default function AddServiceModal({ onClose, onConfirm }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onConfirm(formData);
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:3000/api/service", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ServiceName: formData.serviceName,
+          Category: formData.category,
+          ServiceID: formData.serviceId,
+          ServicePrice: parseFloat(formData.minimumPrice),
+          Duration: formData.duration,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add service");
+      }
+
+      const data = await response.json();
+      setLoading(false);
+
+      onConfirm(data); // Pass the new service data to parent component
+      onClose(); // Close the modal
+    } catch (error) {
+      console.error("Error adding service:", error);
+      alert("Failed to add service. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
       <div className="bg-white rounded-[12px] shadow-lg w-full max-w-md p-6">
-        {/* Modal content */}
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <HandPlatter className="text-FontPrimary border border-gray rounded-[4px]  border-opacity-50 w-11 h-11 p-[8px]" />
+              <HandPlatter className="text-FontPrimary border border-gray rounded-[4px] border-opacity-50 w-11 h-11 p-[8px]" />
               <div>
                 <h2 className="text-left text-l font-semibold text-FontPrimary">
                   Add New Service
@@ -85,10 +145,10 @@ export default function AddServiceModal({ onClose, onConfirm }) {
                 onChange={handleChange}
               >
                 <option value="">Choose a category</option>
-                <option value="hair">Hair</option>
-                <option value="nails">Nails</option>
-                <option value="skin">Skin</option>
-                <option value="massage">Massage</option>
+                <option value="Hair">Hair</option>
+                <option value="Nails">Nails</option>
+                <option value="Skin">Skin</option>
+                <option value="Massage">Massage</option>
               </select>
             </div>
             <div>
@@ -152,7 +212,9 @@ export default function AddServiceModal({ onClose, onConfirm }) {
               <TertiaryBtn type="button" onClick={onClose}>
                 Cancel
               </TertiaryBtn>
-              <PrimaryBtn type="submit">Confirm</PrimaryBtn>
+              <PrimaryBtn type="submit" disabled={loading}>
+                {loading ? "Submitting..." : "Confirm"}
+              </PrimaryBtn>
             </div>
           </form>
         </div>
@@ -162,6 +224,6 @@ export default function AddServiceModal({ onClose, onConfirm }) {
 }
 
 AddServiceModal.propTypes = {
-  onClose: PropTypes.func.isRequired, // Required function to handle modal closing
-  onConfirm: PropTypes.func.isRequired, // Required function to handle confirmation
+  onClose: PropTypes.func.isRequired,
+  onConfirm: PropTypes.func.isRequired,
 };

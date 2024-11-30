@@ -2,7 +2,7 @@ import "./App.css";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Applayout from "./ui/applayout";
 import Dashbaord from "./pages/Admin/Dashboard";
-import Payment from "./pages/Admin/PaymentEdit";
+import Payment from "./pages/Admin/Payment";
 import Services from "./pages/Admin/Services";
 import Appointment from "./pages/Admin/Appointment";
 import Inventory from "./pages/Admin/Inventory";
