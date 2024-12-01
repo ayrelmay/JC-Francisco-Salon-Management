@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import DataTable from "../../components/Global/datatable"; // Import the DataTable component
 
 const payments = [
   {
@@ -84,86 +84,41 @@ const payments = [
 ];
 
 const PaymentTable = () => {
-  const navigate = useNavigate();
+  // Define the columns for the DataTable without the action column
+  const columns = [
+    { key: "chair", header: "Chair" },
+    { key: "name", header: "Name" },
+    { key: "beautyTech", header: "Beauty Tech" },
+    { key: "time", header: "Time" },
+    { key: "amount", header: "Amount" },
+  ];
 
-  const handleRowClick = (paymentId) => {
-    navigate(`/payment/paymentServices/${paymentId}`);
+  // Define the onEdit and onDelete functions (if needed)
+  const handleEdit = (payment) => {
+    // Implement edit functionality
+    console.log("Edit", payment);
+  };
+
+  const handleDelete = (payment) => {
+    // Implement delete functionality
+    console.log("Delete", payment);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-6">
+        {/* Header with left-aligned title */}
+        <div className="mb-6 text-left">
           <h1 className="text-2xl font-bold text-gray-900">Payment</h1>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Chair
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Name
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Beauty Tech
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Time
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Amount
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {payments.slice(0, 10).map((payment) => (
-                  <tr
-                    key={payment.id}
-                    onClick={() => handleRowClick(payment.id)}
-                    className="hover:bg-gray-50 cursor-pointer transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {payment.chair}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {payment.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {payment.beautyTech}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {payment.time}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ₱ {payment.amount.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {/* DataTable with limited rows and no action column */}
+        <DataTable
+          columns={columns}
+          data={payments.slice(0, 10)} // Limit data to the first 10 rows
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       </div>
     </div>
   );
