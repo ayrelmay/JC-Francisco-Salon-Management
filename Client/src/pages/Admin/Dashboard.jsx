@@ -1,12 +1,10 @@
-"use client";
-
 import Card from "../../components/Admin/Card";
 import MetricCard from "../../components/Admin/MetriCard";
 import Table from "../../components/Admin/Table";
 import TableCell from "../../components/Admin/TableCell";
 import TableHead from "../../components/Admin/TableHead";
 import TableHeader from "../../components/Admin/TableHeader";
-import { BellIcon } from "lucide-react";
+import { BellIcon, HandCoins, SunMedium, Moon, Users } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -54,31 +52,42 @@ export default function Dashboard() {
 
         {/* Metric Cards */}
         <div className=" w-full mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MetricCard title="Revenue" value="₱16,800" change="+2.5%" icon="₱" />
-          <MetricCard title="Opening" value="₱200.00" icon="☀️" />
-          <MetricCard
-            title="Closing"
-            value="₱17,000"
-            change="+2.5%"
-            icon="🌙"
-          />
-          <MetricCard title="Customer" value="20" change="+2.5%" icon="👥" />
+          <MetricCard title="Revenue" value="₱16,800" icon={<HandCoins />} />
+          <MetricCard title="Opening" value="₱200.00" icon={<SunMedium />} />
+          <MetricCard title="Closing" value="₱17,000" icon={<Moon />} />
+          <MetricCard title="Customer" value="20" icon={<Users />} />
         </div>
 
         {/* Charts and Tables Grid */}
-        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 ">
           {/* Revenue Chart */}
           <Card>
-            <h2 className=" text-left mb-4 text-lg font-semibold text-[#FontPrimary]">
+            <h2 className=" text-left mb-4 text-sm text-FontPrimary">
               Daily Revenue
             </h2>
             <div className="h-[250px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={dailyRevenueData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Bar dataKey="revenue" fill="#4F46E5" />
+                  <CartesianGrid
+                    strokeDasharray="2 2"
+                    stroke="#E0E0E0"
+                    strokeWidth={0.5}
+                  />
+                  <XAxis
+                    dataKey="day"
+                    tick={{ fontSize: "0.75rem", fill: "#FontPrimary" }}
+                    strokeWidth={0.5}
+                  />
+                  <YAxis
+                    tick={{ fontSize: "0.75rem", fill: "#FontPrimary" }}
+                    strokeWidth={0.5}
+                  />
+                  <Bar
+                    dataKey="revenue"
+                    fill="#FontPrimary"
+                    barSize={10} // Adjust the width of the bars
+                    radius={[10, 10, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -87,9 +96,7 @@ export default function Dashboard() {
           {/* Appointments Table */}
           <Card>
             <div className=" flex items-left justify-between mb-4">
-              <h2 className="text-lg font-semibold text-FontPrimary">
-                Today Appointments
-              </h2>
+              <h2 className="text-sm text-FontPrimary">Today Appointments</h2>
               <button className="text-blue-600 hover:underline">
                 View All
               </button>
@@ -130,7 +137,7 @@ export default function Dashboard() {
 
           {/* Employee's Login */}
           <Card>
-            <h2 className="text-left mb-4 text-lg font-semibold text-FontPrimary">
+            <h2 className="text-left mb-4 text-sm text-FontPrimary">
               Employee Login
             </h2>
             <div className="overflow-x-auto">
@@ -159,7 +166,7 @@ export default function Dashboard() {
 
           {/* Inventory Overview */}
           <Card>
-            <h2 className="text-left mb-4 text-lg font-semibold text-[#FontPrimary]">
+            <h2 className="text-left mb-4 text-sm text-FontPrimary">
               Inventory Overview
             </h2>
             <div className="flex flex-col sm:flex-row items-center justify-center">

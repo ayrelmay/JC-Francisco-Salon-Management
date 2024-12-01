@@ -4,13 +4,17 @@ import PropTypes from "prop-types";
 function MetricCard({ title, value, change, icon }) {
   return (
     <Card>
-      <div className="flex items-center justify-between flex-grow">
+      <div className="flex items-left justify-between flex-grow px-3">
         <div>
-          <p className="text-sm text-gray-500">{title}</p>
-          <p className="text-2xl font-bold text-FontPrimary">{value}</p>
+          <p className="text-sm text-gray-500 text-left my-3">{title}</p>
+          <p className="my-2 text-xl text-left font-semibold text-FontPrimary">
+            {value}
+          </p>
           {change && <p className="text-sm text-green-600">{change}</p>}
         </div>
-        <div className="text-2xl">{icon}</div>
+        <div className="flex items-center justify-center w-10 h-10 rounded-full border border-Tableline border-opacity-50">
+          {icon}
+        </div>
       </div>
     </Card>
   );
