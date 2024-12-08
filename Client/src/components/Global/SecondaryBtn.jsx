@@ -2,10 +2,11 @@ import PropTypes from "prop-types";
 
 export default function SecondaryBtn({
   children,
-  onClick,
+  onClick = undefined,
   className = "",
   type = "button",
   disabled = false,
+  color = "text-BtnPrimary",
 }) {
   return (
     <button
@@ -20,8 +21,8 @@ export default function SecondaryBtn({
         rounded 
         rounded-5px 
         border
-        text-BtnPrimary
-         border-BtnPrimary
+        ${color}
+        border-BtnPrimary
         bg-white
         font-normal 
         transition-colors 
@@ -46,11 +47,5 @@ SecondaryBtn.propTypes = {
   className: PropTypes.string,
   type: PropTypes.oneOf(["button", "submit", "reset"]),
   disabled: PropTypes.bool,
-};
-
-SecondaryBtn.defaultProps = {
-  onClick: undefined,
-  className: "",
-  type: "button",
-  disabled: false,
+  color: PropTypes.string,
 };

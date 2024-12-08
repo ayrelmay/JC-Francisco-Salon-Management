@@ -4,7 +4,7 @@ import PrimaryBtn from "../Global/PrimaryBtn";
 import TertiaryBtn from "../Global/TertiaryBtn";
 import { HandPlatter, X } from "lucide-react";
 
-export default function AddServiceModal({ onClose, onConfirm }) {
+export default function AddServiceModal({ onClose, onServiceAdded }) {
   const [formData, setFormData] = useState({
     serviceName: "",
     category: "",
@@ -57,32 +57,39 @@ export default function AddServiceModal({ onClose, onConfirm }) {
     setLoading(true);
 
     try {
+      // Log the request payload for debugging
+      const payload = {
+        ServiceName: formData.serviceName.trim(),
+        Category: formData.category,
+        ServiceID: formData.serviceId,
+        ServicePrice: parseFloat(formData.minimumPrice),
+        Duration: formData.duration.trim(),
+      };
+      console.log("Sending payload:", payload);
+
       const response = await fetch("http://localhost:3000/api/service", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ServiceName: formData.serviceName,
-          Category: formData.category,
-          ServiceID: formData.serviceId,
-          ServicePrice: parseFloat(formData.minimumPrice),
-          Duration: formData.duration,
-        }),
+        body: JSON.stringify(payload),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to add service");
+        throw new Error(data.message || "Failed to add service");
       }
 
-      const data = await response.json();
       setLoading(false);
 
-      onConfirm(data); // Pass the new service data to parent component
-      onClose(); // Close the modal
+      if (typeof onServiceAdded === "function") {
+        onServiceAdded(data.service);
+      }
+      onClose();
     } catch (error) {
       console.error("Error adding service:", error);
-      alert("Failed to add service. Please try again.");
+      alert(`Failed to add service: ${error.message}`);
       setLoading(false);
     }
   };
@@ -225,5 +232,5 @@ export default function AddServiceModal({ onClose, onConfirm }) {
 
 AddServiceModal.propTypes = {
   onClose: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
+  onServiceAdded: PropTypes.func.isRequired,
 };

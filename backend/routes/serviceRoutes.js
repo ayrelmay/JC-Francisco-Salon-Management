@@ -14,23 +14,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Fetch the next Service ID
-// router.get("/next-id", async (req, res) => {
-//   try {
-//     const [lastService] = await db.query(
-//       "SELECT Id FROM service ORDER BY Id DESC LIMIT 1"
-//     );
-//     const lastId = lastService.length > 0 ? lastService[0].Id : "SRV-1000";
-//     const nextId = `SRV-${String(
-//       parseInt(lastId.split("-")[1], 10) + 1
-//     ).padStart(4, "0")}`;
-//     res.status(200).json({ nextId });
-//   } catch (err) {
-//     console.error("Error fetching next Service ID:", err.message);
-//     res.status(500).json({ error: "Failed to fetch next Service ID" });
-//   }
-// });
-
 router.get("/next-id", async (req, res) => {
   try {
     // Query the last inserted ID from the database
@@ -67,19 +50,47 @@ router.get("/next-id", async (req, res) => {
 
 // Add a new service
 router.post("/", async (req, res) => {
-  const { ServiceName, ServicePrice, Duration, Category } = req.body;
+  const { ServiceName, ServicePrice, Duration, Category, ServiceID } = req.body;
+
+  // Validate required fields
+  if (!ServiceID || !ServiceName || !ServicePrice || !Duration || !Category) {
+    return res.status(400).json({
+      error: "Missing required fields",
+      details: {
+        ServiceID: !ServiceID ? "Service ID is required" : null,
+        ServiceName: !ServiceName ? "Service Name is required" : null,
+        ServicePrice: !ServicePrice ? "Service Price is required" : null,
+        Duration: !Duration ? "Duration is required" : null,
+        Category: !Category ? "Category is required" : null,
+      },
+    });
+  }
+
   try {
+    // Check if service ID already exists
+    const [existing] = await db.query("SELECT Id FROM service WHERE Id = ?", [
+      ServiceID,
+    ]);
+
+    if (existing.length > 0) {
+      return res.status(409).json({ error: "Service ID already exists" });
+    }
+
     const [result] = await db.query(
-      "INSERT INTO service (ServiceName, ServicePrice, Duration, Category) VALUES (?, ?, ?, ?)",
-      [ServiceName, ServicePrice, Duration, Category]
+      "INSERT INTO service (Id, ServiceName, ServicePrice, Duration, Category) VALUES (?, ?, ?, ?, ?)",
+      [ServiceID, ServiceName, ServicePrice, Duration, Category]
     );
+
     res.status(201).json({
       message: "Service added successfully",
-      serviceId: result.insertId,
+      serviceId: ServiceID,
     });
   } catch (err) {
-    console.error("Error adding service:", err.message);
-    res.status(500).json({ error: "Failed to add service" });
+    console.error("Error adding service:", err);
+    res.status(500).json({
+      error: "Failed to add service",
+      details: err.message,
+    });
   }
 });
 

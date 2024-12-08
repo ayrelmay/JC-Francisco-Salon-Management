@@ -2,18 +2,18 @@ import PrimaryBtn from "../../components/Global/PrimaryBtn";
 import SecondaryBtn from "../../components/Global/SecondaryBtn";
 import PropTypes from "prop-types";
 
-const ActionButtons = ({ onAdd, onArchive }) => {
+const ActionButtons = ({ onAdd, onArchive = null }) => {
   return (
     <div className="flex gap-2">
       <PrimaryBtn onClick={onAdd}>Add Service</PrimaryBtn>
-      <SecondaryBtn onClick={onArchive}>Archive</SecondaryBtn>
+      {onArchive && <SecondaryBtn onClick={onArchive}>Archive</SecondaryBtn>}
     </div>
   );
 };
 
 ActionButtons.propTypes = {
-  onAdd: PropTypes.func.isRequired, // `onAdd` must be a function and is required
-  onArchive: PropTypes.func.isRequired, // `onArchive` must be a function and is required
+  onAdd: PropTypes.func.isRequired,
+  onArchive: PropTypes.func,
 };
 
 export default ActionButtons;

@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 
 export default function PrimaryBtn({
   children,
-  onClick,
+  onClick = undefined,
   className = "",
   type = "button",
   disabled = false,
@@ -40,11 +40,4 @@ PrimaryBtn.propTypes = {
   className: PropTypes.string,
   type: PropTypes.oneOf(["button", "submit", "reset"]),
   disabled: PropTypes.bool,
-};
-
-PrimaryBtn.defaultProps = {
-  onClick: undefined,
-  className: "",
-  type: "button",
-  disabled: false,
 };

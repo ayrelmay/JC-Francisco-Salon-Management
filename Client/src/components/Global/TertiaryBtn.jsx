@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 
 export default function TertiaryBtn({
   children,
-  onClick,
+  onClick = undefined,
   className = "",
   type = "button",
   disabled = false,
@@ -42,11 +42,4 @@ TertiaryBtn.propTypes = {
   className: PropTypes.string,
   type: PropTypes.oneOf(["button", "submit", "reset"]),
   disabled: PropTypes.bool,
-};
-
-TertiaryBtn.defaultProps = {
-  onClick: undefined,
-  className: "",
-  type: "button",
-  disabled: false,
 };

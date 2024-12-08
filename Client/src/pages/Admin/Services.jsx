@@ -37,12 +37,17 @@ const Services = () => {
   const handleAddService = () => setShowModal(true);
   const handleModalClose = () => setShowModal(false);
 
-  const handleServiceAdded = () => {
-    fetchServices(); // Refresh services after adding
+  const handleServiceAdded = async () => {
+    await fetchServices(); // Refresh the services list
   };
 
   const handleDelete = (service) => {
     alert(`Service ${service.ServiceName} deleted!`);
+  };
+
+  const handleArchive = () => {
+    // Add your archive logic here
+    console.log("Archiving services");
   };
 
   const columns = [
@@ -71,7 +76,7 @@ const Services = () => {
         <>
           <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
             <SearchBar value={searchTerm} onChange={setSearchTerm} />
-            <ActionButtons onAdd={handleAddService} />
+            <ActionButtons onAdd={handleAddService} onArchive={handleArchive} />
           </div>
 
           <DataTable
@@ -85,7 +90,6 @@ const Services = () => {
 
       {showModal && (
         <AddServiceModal
-          isOpen={showModal}
           onClose={handleModalClose}
           onServiceAdded={handleServiceAdded}
         />

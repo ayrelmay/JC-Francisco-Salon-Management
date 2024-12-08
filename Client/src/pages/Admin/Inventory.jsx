@@ -21,14 +21,14 @@ const Inventory = () => {
       name: "Rebon Treatment",
       category: "Hair Color",
       quantity: 20,
-      status: "Out of Stock",
+      status: "Low Stock",
     },
     {
       id: "ITM-A0003",
       name: "Brazilian Treatment",
       category: "Hair Color",
       quantity: 20,
-      status: "Out of Stock",
+      status: "In Stock",
     },
     {
       id: "ITM-A0004",
@@ -71,7 +71,24 @@ const Inventory = () => {
     { key: "name", header: "Item Name" },
     { key: "category", header: "Category" },
     { key: "quantity", header: "Quantity" },
-    { key: "status", header: "Status" },
+    {
+      key: "status",
+      header: "Status",
+      render: (item) => (
+        <div className="flex items-center">
+          <span
+            className={`inline-block w-3 h-3 mr-2 rounded-full ${
+              item.status === "Out of Stock"
+                ? "bg-green"
+                : item.status === "Low Stock"
+                ? "bg-yellow"
+                : "bg-red"
+            }`}
+          ></span>
+          {item.status}
+        </div>
+      ),
+    },
   ];
 
   // Handle the action buttons
