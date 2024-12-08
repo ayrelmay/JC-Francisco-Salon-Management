@@ -7,13 +7,25 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const [services] = await db.query("SELECT * FROM service");
-    res.status(200).json(services);
+
+    // Format the prices with commas for numbers >= 1000
+    const formattedServices = services.map((service) => ({
+      ...service,
+      ServicePrice:
+        service.ServicePrice.toString().length >= 4
+          ? service.ServicePrice.toString().replace(
+              /\B(?=(\d{3})+(?!\d))/g,
+              ","
+            )
+          : service.ServicePrice,
+    }));
+
+    res.status(200).json(formattedServices);
   } catch (err) {
     console.error("Error fetching services:", err.message);
     res.status(500).json({ error: "Failed to retrieve services" });
   }
 });
-
 router.get("/next-id", async (req, res) => {
   try {
     // Query the last inserted ID from the database

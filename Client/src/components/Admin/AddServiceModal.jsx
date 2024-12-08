@@ -42,13 +42,34 @@ export default function AddServiceModal({ onClose, onServiceAdded }) {
     fetchNextServiceId();
   }, []);
 
-  // Handle input changes
+  // Add this helper function inside the component
+  const formatNumberWithCommas = (value) => {
+    // Remove any existing commas and non-digit characters except decimal point
+    const cleanValue = value.replace(/[^\d.]/g, "");
+    // Format with commas
+    const parts = cleanValue.split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+  };
+
+  // Update the handleChange function
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+    if (name === "minimumPrice") {
+      // Format the price with commas
+      const formattedValue = formatNumberWithCommas(value);
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: formattedValue,
+      }));
+    } else {
+      // Handle other fields normally
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   // Handle form submission
@@ -62,7 +83,7 @@ export default function AddServiceModal({ onClose, onServiceAdded }) {
         ServiceName: formData.serviceName.trim(),
         Category: formData.category,
         ServiceID: formData.serviceId,
-        ServicePrice: parseFloat(formData.minimumPrice),
+        ServicePrice: parseFloat(formData.minimumPrice.replace(/,/g, "")), // Remove commas before parsing
         Duration: formData.duration.trim(),
       };
       console.log("Sending payload:", payload);
@@ -182,7 +203,7 @@ export default function AddServiceModal({ onClose, onServiceAdded }) {
               </label>
               <div className="flex gap-3">
                 <input
-                  type="number"
+                  type="text"
                   name="minimumPrice"
                   placeholder="Enter minimum price"
                   required
