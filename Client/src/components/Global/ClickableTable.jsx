@@ -62,17 +62,19 @@ function ClickableTable({ columns, data, onArchive }) {
                   </td>
                 ))}
                 <td className="px-6 py-4 text-center">
-                  <div className="flex items-center justify-center">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onArchive(item);
-                      }}
-                      className="flex items-center justify-center h-6 w-6 rounded bg-gray-100 border border-Tableline border-opacity-50 hover:bg-gray-200"
-                    >
-                      <Archive className="h-4 w-4 text-gray-600" />
-                    </button>
-                  </div>
+                  {onArchive && (
+                    <div className="flex items-center justify-center">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onArchive(item);
+                        }}
+                        className="flex items-center justify-center h-6 w-6 rounded bg-gray-100 border border-Tableline border-opacity-50 hover:bg-gray-200"
+                      >
+                        <Archive className="h-4 w-4 text-gray-600" />
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}
@@ -133,7 +135,7 @@ ClickableTable.propTypes = {
     })
   ).isRequired,
   data: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onArchive: PropTypes.func.isRequired,
+  onArchive: PropTypes.func,
 };
 
 export default ClickableTable;

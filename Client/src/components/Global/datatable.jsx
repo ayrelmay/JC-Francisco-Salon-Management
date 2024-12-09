@@ -1,15 +1,37 @@
 import PropTypes from "prop-types";
-import { PencilIcon, TrashIcon } from "lucide-react";
+import { SquarePen, ArchiveRestore } from "lucide-react";
 import { useState } from "react";
 
-function DataTable({ columns, data, onEdit, onDelete }) {
+function DataTable({ columns, data, onDelete, onEdit }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 7;
+  const itemsPerPage = 6;
 
-  // Pagination logic
+  // filtering for archived
+  const filteredData = data.filter((item) => item.archived === 1);
+
+  // pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const paginatedData = filteredData.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const handleEdit = (item) => {
+    if (onEdit) {
+      onEdit(item);
+    } else {
+      console.log("Editing item:", item);
+    }
+  };
+
+  const handleDelete = (item) => {
+    if (onDelete) {
+      onDelete(item);
+    } else {
+      console.log("Deleting item:", item);
+    }
+  };
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -29,7 +51,7 @@ function DataTable({ columns, data, onEdit, onDelete }) {
                   {column.header}
                 </th>
               ))}
-              {(onEdit || onDelete) && (
+              {onDelete && (
                 <th className="border-b border-Tableline border-opacity-30 px-6 py-4.5 text-center text-[12px] font-semibold text-gray-600">
                   Action
                 </th>
@@ -50,25 +72,21 @@ function DataTable({ columns, data, onEdit, onDelete }) {
                     {item[column.key]}
                   </td>
                 ))}
-                {(onEdit || onDelete) && (
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-center gap-2">
-                      {onEdit && (
-                        <button
-                          onClick={() => onEdit(item)}
-                          className="flex items-center justify-center h-6 w-6 rounded bg-gray-100 border border-Tableline border-opacity-50 hover:bg-gray-200"
-                        >
-                          <PencilIcon className="h-4 w-4 text-gray-600" />
-                        </button>
-                      )}
-                      {onDelete && (
-                        <button
-                          onClick={() => onDelete(item)}
-                          className="flex items-center justify-center h-6 w-6 rounded bg-gray-100 border border-Tableline border-opacity-50 hover:bg-gray-200"
-                        >
-                          <TrashIcon className="h-4 w-4 text-gray-600" />
-                        </button>
-                      )}
+                {onDelete && (
+                  <td className="px-4 py-4">
+                    <div className="flex items-center justify-center space-x-2">
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="flex items-center justify-center w-8 h-8 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-Tableline border-opacity-30"
+                      >
+                        <SquarePen className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item)}
+                        className="flex items-center justify-center w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100 border border-Tableline border-opacity-30"
+                      >
+                        <ArchiveRestore className="h-4 w-4" />
+                      </button>
                     </div>
                   </td>
                 )}
