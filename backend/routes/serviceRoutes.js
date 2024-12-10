@@ -106,4 +106,53 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Update service archive status
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { archived } = req.body;
+
+  try {
+    const [result] = await db.query(
+      "UPDATE service SET archived = ? WHERE Id = ?",
+      [archived, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Service not found" });
+    }
+
+    res.status(200).json({
+      message: "Service archive status updated successfully",
+      serviceId: id,
+    });
+  } catch (err) {
+    console.error("Error updating service archive status:", err);
+    res.status(500).json({
+      error: "Failed to update service archive status",
+      details: err.message,
+    });
+  }
+});
+
+// Corrected route to fetch a specific service by ID
+router.get("/:id", async (req, res) => {
+  const serviceId = req.params.id;
+
+  try {
+    const [rows] = await db.query("SELECT * FROM service WHERE Id = ?", [
+      serviceId,
+    ]);
+
+    if (rows.length > 0) {
+      res.status(200).json(rows[0]);
+    } else {
+      res.status(404).json({ error: "Service not found" });
+    }
+  } catch (err) {
+    k;
+    console.error("Error fetching service by ID:", err.message);
+    res.status(500).json({ error: "Failed to retrieve service" });
+  }
+});
+
 module.exports = router;

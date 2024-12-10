@@ -3,6 +3,7 @@ import DataTable from "../../components/Global/datatable";
 import AddServiceModal from "../../components/Admin/AddServiceModal";
 import SearchBar from "../../components/Global/SearchBar";
 import ActionButtons from "../../components/Global/ActionButtons";
+import ConfirmationModal from "../../components/Global/ConfirmationModal";
 
 const Services = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -10,6 +11,8 @@ const Services = () => {
   const [servicesOffer, setServicesOffer] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState(null);
 
   const API_URL = "http://localhost:3000/api/service";
 
@@ -41,8 +44,46 @@ const Services = () => {
     await fetchServices(); // Refresh the services list
   };
 
-  const handleDelete = (service) => {
-    alert(`Service ${service.ServiceName} deleted!`);
+  const handleDelete = async (service) => {
+    setServiceToDelete(service);
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!serviceToDelete) return;
+
+    try {
+      console.log("Attempting to update service:", serviceToDelete.Id);
+      const response = await fetch(`${API_URL}/${serviceToDelete.Id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ archived: 0 }),
+      });
+
+      console.log("Response status:", response.status);
+      const responseData = await response.json();
+      console.log("Response data:", responseData);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to update service: ${
+            responseData.message || response.statusText
+          }`
+        );
+      }
+
+      alert(`Service ${serviceToDelete.ServiceName} restored from archive!`);
+      await fetchServices();
+      window.location.reload();
+    } catch (err) {
+      console.error("Error updating service:", err);
+      setError(`Update failed: ${err.message}`);
+    } finally {
+      setIsConfirmModalOpen(false);
+      setServiceToDelete(null);
+    }
   };
 
   const handleArchive = () => {
@@ -66,6 +107,10 @@ const Services = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 z-40"></div>
+      )}
+
       <h1 className="text-left text-2xl font-bold mb-6">Services</h1>
 
       {error && <p className="text-red-500">Error: {error}</p>}
@@ -94,6 +139,14 @@ const Services = () => {
           onServiceAdded={handleServiceAdded}
         />
       )}
+
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Confirm Delete"
+        message={`Are you sure you want to delete ${serviceToDelete?.ServiceName}?`}
+      />
     </div>
   );
 };

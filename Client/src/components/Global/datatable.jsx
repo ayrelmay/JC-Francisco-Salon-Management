@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { SquarePen, ArchiveRestore } from "lucide-react";
 import { useState } from "react";
+import axios from "axios";
 
 function DataTable({ columns, data, onDelete, onEdit }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -25,11 +26,17 @@ function DataTable({ columns, data, onDelete, onEdit }) {
     }
   };
 
-  const handleDelete = (item) => {
-    if (onDelete) {
-      onDelete(item);
-    } else {
-      console.log("Deleting item:", item);
+  const handleDelete = async (item) => {
+    try {
+      await axios.put(`http://localhost:3000/api/service/${item.Id}`, {
+        archived: 0,
+      });
+
+      if (onDelete) {
+        onDelete(item);
+      }
+    } catch (error) {
+      console.error("Error updating archive status:", error);
     }
   };
 
