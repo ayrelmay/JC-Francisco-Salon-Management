@@ -89,7 +89,7 @@ router.post("/", async (req, res) => {
     }
 
     const [result] = await db.query(
-      "INSERT INTO service (Id, ServiceName, ServicePrice, Duration, Category) VALUES (?, ?, ?, ?, ?)",
+      "INSERT INTO service (Id, ServiceName, ServicePrice, Duration, Category, archived) VALUES (?, ?, ?, ?, ?, 1)",
       [ServiceID, ServiceName, ServicePrice, Duration, Category]
     );
 
