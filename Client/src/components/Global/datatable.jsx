@@ -2,10 +2,13 @@ import PropTypes from "prop-types";
 import { SquarePen, ArchiveRestore } from "lucide-react";
 import { useState } from "react";
 import axios from "axios";
+import EditServiceModal from "../Admin/EditServiceModal";
 
 function DataTable({ columns, data, onDelete, onEdit }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   // filtering for archived
   const filteredData = data.filter((item) => item.archived === 1);
@@ -19,11 +22,8 @@ function DataTable({ columns, data, onDelete, onEdit }) {
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const handleEdit = (item) => {
-    if (onEdit) {
-      onEdit(item);
-    } else {
-      console.log("Editing item:", item);
-    }
+    setSelectedItem(item);
+    setIsEditModalOpen(true);
   };
 
   const handleDelete = async (item) => {
@@ -42,6 +42,22 @@ function DataTable({ columns, data, onDelete, onEdit }) {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };
+
+  const handleServiceEdited = (editedService) => {
+    // Update the selected item with the edited service data
+    setSelectedItem(editedService);
+
+    // Keep the modal open to display the updated data
+    // You can add a timeout to close it automatically after a few seconds if desired
+    setTimeout(() => {
+      setIsEditModalOpen(false);
+
+      // If onEdit prop exists, call it with the edited service
+      if (onEdit) {
+        onEdit(editedService);
+      }
+    }, 2000); // Close after 2 seconds
   };
 
   return (
@@ -120,6 +136,16 @@ function DataTable({ columns, data, onDelete, onEdit }) {
             </button>
           ))}
         </div>
+      )}
+
+      {isEditModalOpen && (
+        <EditServiceModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          service={selectedItem}
+          onServiceEdited={handleServiceEdited}
+          initialData={selectedItem}
+        />
       )}
     </div>
   );

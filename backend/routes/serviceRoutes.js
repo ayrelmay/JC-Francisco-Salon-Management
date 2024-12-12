@@ -155,4 +155,35 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// Update service details
+router.put("/edit/:id", async (req, res) => {
+  const { id } = req.params;
+  const { serviceName, category, minimumPrice, duration } = req.body;
+
+  try {
+    // Remove commas from price and convert to number
+    const cleanPrice = parseFloat(minimumPrice.replace(/,/g, ""));
+
+    const [result] = await db.query(
+      "UPDATE service SET ServiceName = ?, Category = ?, ServicePrice = ?, Duration = ? WHERE Id = ?",
+      [serviceName, category, cleanPrice, duration, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Service not found" });
+    }
+
+    res.status(200).json({
+      message: "Service updated successfully",
+      serviceId: id,
+    });
+  } catch (err) {
+    console.error("Error updating service:", err);
+    res.status(500).json({
+      error: "Failed to update service",
+      details: err.message,
+    });
+  }
+});
+
 module.exports = router;
