@@ -23,6 +23,23 @@ export default function EditServiceModal({
 
   const [loading, setLoading] = useState(false);
 
+  const hasFormChanged = () => {
+    const initialValues = {
+      serviceName: service?.ServiceName || initialData?.ServiceName || "",
+      category: service?.Category || initialData?.Category || "",
+      serviceId: service?.Id || initialData?.Id || "",
+      minimumPrice:
+        service?.ServicePrice?.toLocaleString() ||
+        initialData?.ServicePrice?.toLocaleString() ||
+        "",
+      duration: service?.Duration || initialData?.Duration || "",
+    };
+
+    return Object.keys(formData).some(
+      (key) => formData[key] !== initialValues[key]
+    );
+  };
+
   const formatNumberWithCommas = (value) => {
     const cleanValue = value.replace(/[^\d.]/g, "");
     const parts = cleanValue.split(".");
@@ -78,7 +95,6 @@ export default function EditServiceModal({
       onClose();
     } catch (error) {
       console.error("Error updating service:", error);
-      // You might want to add error handling UI here
     } finally {
       setLoading(false);
     }
@@ -228,7 +244,7 @@ export default function EditServiceModal({
               <TertiaryBtn type="button" onClick={onClose}>
                 Cancel
               </TertiaryBtn>
-              <PrimaryBtn type="submit" disabled={loading}>
+              <PrimaryBtn type="submit" disabled={loading || !hasFormChanged()}>
                 {loading ? "Updating..." : "Save Changes"}
               </PrimaryBtn>
             </div>

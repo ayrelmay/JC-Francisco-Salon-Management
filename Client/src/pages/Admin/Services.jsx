@@ -4,6 +4,7 @@ import AddServiceModal from "../../components/Admin/AddServiceModal";
 import SearchBar from "../../components/Global/SearchBar";
 import ActionButtons from "../../components/Global/ActionButtons";
 import ConfirmationModal from "../../components/Global/ConfirmationModal";
+import SuccessfulToast from "../../components/Global/SuccessfulToast";
 
 const Services = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,6 +14,7 @@ const Services = () => {
   const [error, setError] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const API_URL = "http://localhost:3000/api/service";
 
@@ -53,7 +55,6 @@ const Services = () => {
     if (!serviceToDelete) return;
 
     try {
-      console.log("Attempting to update service:", serviceToDelete.Id);
       const response = await fetch(`${API_URL}/${serviceToDelete.Id}`, {
         method: "PUT",
         headers: {
@@ -62,9 +63,7 @@ const Services = () => {
         body: JSON.stringify({ archived: 0 }),
       });
 
-      console.log("Response status:", response.status);
       const responseData = await response.json();
-      console.log("Response data:", responseData);
 
       if (!response.ok) {
         throw new Error(
@@ -75,8 +74,7 @@ const Services = () => {
       }
 
       alert(`Service ${serviceToDelete.ServiceName} restored from archive!`);
-      await fetchServices();
-      window.location.reload();
+      await fetchServices(); // This will refresh just the data
     } catch (err) {
       console.error("Error updating service:", err);
       setError(`Update failed: ${err.message}`);
@@ -89,6 +87,15 @@ const Services = () => {
   const handleArchive = () => {
     // Add your archive logic here
     console.log("Archiving services");
+  };
+
+  const handleServiceEdited = async () => {
+    await fetchServices(); // Refresh the services list
+    setShowSuccessToast(true);
+
+    setTimeout(() => {
+      setShowSuccessToast(false);
+    }, 3000);
   };
 
   const columns = [
@@ -129,6 +136,7 @@ const Services = () => {
             columns={columns}
             data={filteredServicesOffer}
             onDelete={handleDelete}
+            onRefresh={handleServiceEdited}
           />
         </>
       )}
@@ -147,6 +155,14 @@ const Services = () => {
         title="Confirm Delete"
         message={`Are you sure you want to delete ${serviceToDelete?.ServiceName}?`}
       />
+
+      {showSuccessToast && (
+        <SuccessfulToast
+          message="Service Updated"
+          subMessage="Service Updated"
+          onClose={() => setShowSuccessToast(false)}
+        />
+      )}
     </div>
   );
 };

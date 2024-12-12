@@ -4,7 +4,7 @@ import { useState } from "react";
 import axios from "axios";
 import EditServiceModal from "../Admin/EditServiceModal";
 
-function DataTable({ columns, data, onDelete, onEdit }) {
+function DataTable({ columns, data, onDelete, onEdit, onRefresh }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -45,19 +45,20 @@ function DataTable({ columns, data, onDelete, onEdit }) {
   };
 
   const handleServiceEdited = (editedService) => {
-    // Update the selected item with the edited service data
     setSelectedItem(editedService);
 
-    // Keep the modal open to display the updated data
-    // You can add a timeout to close it automatically after a few seconds if desired
-    setTimeout(() => {
-      setIsEditModalOpen(false);
+    // Call onRefresh to update the table data
+    if (onRefresh) {
+      onRefresh();
+    }
 
-      // If onEdit prop exists, call it with the edited service
-      if (onEdit) {
-        onEdit(editedService);
-      }
-    }, 2000); // Close after 2 seconds
+    // If onEdit prop exists, call it with the edited service
+    if (onEdit) {
+      onEdit(editedService);
+    }
+
+    // Close the modal
+    setIsEditModalOpen(false);
   };
 
   return (
@@ -161,6 +162,7 @@ DataTable.propTypes = {
   data: PropTypes.arrayOf(PropTypes.object).isRequired,
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,
+  onRefresh: PropTypes.func,
 };
 
 export default DataTable;
