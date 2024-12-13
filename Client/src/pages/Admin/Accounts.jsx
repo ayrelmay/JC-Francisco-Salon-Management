@@ -56,9 +56,7 @@ const Accounts = () => {
   );
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Employees</h1>
-
+    <div className="p-8">
       {/* Search and Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
         <div className="relative flex-1 max-w-md">

@@ -71,10 +71,6 @@ const PaymentTable = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-6 text-left">
-          <h1 className="text-2xl font-bold text-gray-900">Payment</h1>
-        </div>
-
         <DataTable
           columns={columns}
           data={payments}

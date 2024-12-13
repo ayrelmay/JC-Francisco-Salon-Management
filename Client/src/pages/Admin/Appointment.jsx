@@ -205,11 +205,6 @@ const Appointments = () => {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl text-left font-bold text-PrimaryFont mb-6">
-        Appointments
-      </h1>
-
-      {/* Header Section */}
       <div className="flex items-center justify-between mb-6">
         {/* Tabs */}
         <div className="flex space-x-4">

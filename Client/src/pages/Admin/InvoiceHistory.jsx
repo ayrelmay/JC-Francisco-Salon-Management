@@ -39,11 +39,7 @@ const InvoiceHistory = () => {
   ];
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-PrimaryFont mb-6">
-        Invoice History
-      </h1>
-
+    <div className="p-8">
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div className="relative flex-1 max-w-md w-full">

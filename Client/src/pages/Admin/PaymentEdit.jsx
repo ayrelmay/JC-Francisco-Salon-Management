@@ -15,36 +15,36 @@ export default function PaymentEdit() {
       id: "all",
       name: "All",
       activeColor:
-        "bg-white text-FontPrimary border border-Tableline border-opacity-30",
-      inactiveColor: "bg-Tableline text-FontPrimary",
+        "bg-white text-FontPrimary border border-Tableline border-opacity-30 text-sm",
+      inactiveColor: "bg-Tableline text-FontPrimary text-sm",
     },
     {
       id: "beauty",
       name: "Beauty",
       activeColor:
-        "bg-white text-FontPrimary border border-Tableline border-opacity-30",
-      inactiveColor: "bg-beauty text-FontPrimary",
+        "bg-white text-FontPrimary border border-Tableline border-opacity-30 text-sm",
+      inactiveColor: "bg-beauty text-FontPrimary text-sm",
     },
     {
-      id: "hair care",
+      id: "hair",
       name: "Hair care",
       activeColor:
-        "bg-white text-FontPrimary border border-Tableline border-opacity-30",
-      inactiveColor: "bg-hair text-FontPrimary",
+        "bg-white text-FontPrimary border border-Tableline border-opacity-30 text-sm",
+      inactiveColor: "bg-hair text-FontPrimary text-sm",
     },
     {
-      id: "nail care",
+      id: "nails",
       name: "Nail care",
       activeColor:
-        "bg-white text-FontPrimary border border-Tableline border-opacity-30",
-      inactiveColor: "bg-nails text-FontPrimary",
+        "bg-white text-FontPrimary border border-Tableline border-opacity-30 text-sm",
+      inactiveColor: "bg-nails text-FontPrimary text-sm",
     },
     {
       id: "spa",
       name: "Spa",
       activeColor:
-        "bg-white text-FontPrimary border border-Tableline border-opacity-30",
-      inactiveColor: "bg-spa text-FontPrimary",
+        "bg-white text-FontPrimary border border-Tableline border-opacity-30 text-sm",
+      inactiveColor: "bg-spa text-FontPrimary text-sm",
     },
   ];
 
@@ -103,9 +103,7 @@ export default function PaymentEdit() {
   }, [id]);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Payment</h1>
-
+    <div className="container mx-auto p-8">
       {/* Category Filter */}
       <div className="flex gap-2 mb-6">
         {categories.map((category) => (

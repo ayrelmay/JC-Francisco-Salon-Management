@@ -140,13 +140,10 @@ const Services = () => {
   );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-8 max-w-7xl mx-auto">
       {isConfirmModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-30 z-40"></div>
       )}
-
-      <h1 className="text-left text-2xl font-bold mb-6">Services</h1>
-
       {error && <p className="text-red-500">Error: {error}</p>}
 
       {loading ? (

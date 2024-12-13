@@ -103,9 +103,7 @@ const Inventory = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-left text-2xl font-bold mb-6">Inventory</h1>
-
+    <div className="p-8 max-w-7xl mx-auto">
       {/* Search and Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
         <SearchBar value={searchTerm} onChange={setSearchTerm} />
