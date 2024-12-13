@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 // Sample services data
 const services = [
@@ -16,12 +17,14 @@ const services = [
   { id: "9", name: "Highlights", price: 700, category: "hair-care" },
 ];
 
-export default function PaymentPage() {
+export default function PaymentEdit() {
+  const { id } = useParams(); // Get the payment ID from the URL
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedServices, setSelectedServices] = useState([]);
   const [staffName1, setStaffName1] = useState("Milo D.");
   const [staffName2, setStaffName2] = useState("Cathy C.");
   const [selectedChair, setSelectedChair] = useState("6");
+  const [paymentDetails, setPaymentDetails] = useState(null);
 
   const categories = [
     { id: "all", name: "All" },
@@ -51,6 +54,23 @@ export default function PaymentPage() {
   const finalTotal = totalAmount + additionalFee;
   const amountPay = 3000;
   const change = amountPay - finalTotal;
+
+  useEffect(() => {
+    const fetchPaymentDetails = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/payment/${id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch payment details");
+        }
+        const data = await response.json();
+        setPaymentDetails(data);
+      } catch (error) {
+        console.error("Error fetching payment details:", error);
+      }
+    };
+
+    fetchPaymentDetails();
+  }, [id]);
 
   return (
     <div className="container mx-auto p-4">
@@ -203,6 +223,13 @@ export default function PaymentPage() {
           </div>
         </div>
       </div>
+
+      {paymentDetails && (
+        <div className="mb-4">
+          <h2>Payment ID: {paymentDetails.Id}</h2>
+          {/* Display other payment details as needed */}
+        </div>
+      )}
     </div>
   );
 }

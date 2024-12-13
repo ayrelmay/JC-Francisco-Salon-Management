@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Applayout from "./ui/applayout";
 import Dashbaord from "./pages/Admin/Dashboard";
 import Payment from "./pages/Admin/Payment";
+import PaymentEdit from "./pages/Admin/PaymentEdit";
 import Services from "./pages/Admin/Services";
 import Appointment from "./pages/Admin/Appointment";
 import Inventory from "./pages/Admin/Inventory";
@@ -14,14 +15,17 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<Applayout />}>
-          <Route index element={<Navigate replace to="Dashboard" />} />
+          <Route index element={<Navigate replace to="dashboard" />} />
           <Route path="dashboard" element={<Dashbaord />} />
-          <Route path="payment" element={<Payment />} />
-          <Route path="Services" element={<Services />} />
-          <Route path="Appointment" element={<Appointment />} />
-          <Route path="Inventory" element={<Inventory />} />
-          <Route path="InvoiceHistory" element={<InvoiceHistory />} />
-          <Route path="Accounts" element={<Accounts />} />
+          <Route path="payment">
+            <Route index element={<Payment />} />
+            <Route path="edit/:id" element={<PaymentEdit />} />
+          </Route>
+          <Route path="services" element={<Services />} />
+          <Route path="appointment" element={<Appointment />} />
+          <Route path="inventory" element={<Inventory />} />
+          <Route path="invoicehistory" element={<InvoiceHistory />} />
+          <Route path="accounts" element={<Accounts />} />
         </Route>
       </Routes>
     </BrowserRouter>

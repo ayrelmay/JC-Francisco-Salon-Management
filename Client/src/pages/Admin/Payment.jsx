@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react"; // Add these imports
 import DataTable from "../../components/Global/datatable";
 import { SquarePen, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // Add this import at the top
 
 const PaymentTable = () => {
   const [payments, setPayments] = useState([]); // Add state for payments
+  const navigate = useNavigate(); // Add this hook
 
   // Define the columns for the DataTable
   const columns = [
@@ -38,11 +40,15 @@ const PaymentTable = () => {
   console.log("Payments state:", payments);
 
   const handleEdit = (payment) => {
-    console.log("Edit", payment);
+    navigate(`/PaymentEdit/${payment.Id}`); // Update handleEdit to navigate
   };
 
   const handleDelete = (payment) => {
     console.log("Delete", payment);
+  };
+
+  const handleRowClick = (payment) => {
+    navigate(`/payment/edit/${payment.Id}`);
   };
 
   const renderActionButtons = (payment) => (
@@ -73,6 +79,7 @@ const PaymentTable = () => {
           columns={columns}
           data={payments}
           actionButtons={renderActionButtons}
+          onRowClick={handleRowClick}
         />
       </div>
     </div>

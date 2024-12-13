@@ -1,7 +1,13 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
 
-function DataTable({ columns, data, actionButtons, itemsPerPage = 6 }) {
+function DataTable({
+  columns,
+  data,
+  actionButtons,
+  itemsPerPage = 6,
+  onRowClick,
+}) {
   const [currentPage, setCurrentPage] = useState(1);
 
   // pagination
@@ -38,7 +44,8 @@ function DataTable({ columns, data, actionButtons, itemsPerPage = 6 }) {
             {paginatedData.map((item, index) => (
               <tr
                 key={index}
-                className="border-b border-Tableline border-opacity-50 transition-colors hover:bg-gray-50"
+                onClick={() => onRowClick && onRowClick(item)}
+                className="border-b border-Tableline border-opacity-50 transition-colors hover:bg-gray-50 cursor-pointer"
               >
                 {columns.map((column) => (
                   <td
@@ -93,6 +100,7 @@ DataTable.propTypes = {
   data: PropTypes.arrayOf(PropTypes.object).isRequired,
   actionButtons: PropTypes.func,
   itemsPerPage: PropTypes.number,
+  onRowClick: PropTypes.func,
 };
 
 export default DataTable;
