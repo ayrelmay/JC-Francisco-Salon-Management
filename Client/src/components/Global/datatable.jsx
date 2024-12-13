@@ -1,64 +1,16 @@
 import PropTypes from "prop-types";
-import { SquarePen, ArchiveRestore } from "lucide-react";
 import { useState } from "react";
-import axios from "axios";
-import EditServiceModal from "../Admin/EditServiceModal";
 
-function DataTable({ columns, data, onDelete, onEdit, onRefresh }) {
+function DataTable({ columns, data, actionButtons, itemsPerPage = 6 }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-
-  // filtering for archived
-  const filteredData = data.filter((item) => item.archived === 1);
 
   // pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredData.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-  const handleEdit = (item) => {
-    setSelectedItem(item);
-    setIsEditModalOpen(true);
-  };
-
-  const handleDelete = async (item) => {
-    try {
-      await axios.put(`http://localhost:3000/api/service/${item.Id}`, {
-        archived: 0,
-      });
-
-      if (onDelete) {
-        onDelete(item);
-      }
-    } catch (error) {
-      console.error("Error updating archive status:", error);
-    }
-  };
+  const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = Math.ceil(data.length / itemsPerPage);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-  };
-
-  const handleServiceEdited = (editedService) => {
-    setSelectedItem(editedService);
-
-    // Call onRefresh to update the table data
-    if (onRefresh) {
-      onRefresh();
-    }
-
-    // If onEdit prop exists, call it with the edited service
-    if (onEdit) {
-      onEdit(editedService);
-    }
-
-    // Close the modal
-    setIsEditModalOpen(false);
   };
 
   return (
@@ -75,7 +27,7 @@ function DataTable({ columns, data, onDelete, onEdit, onRefresh }) {
                   {column.header}
                 </th>
               ))}
-              {onDelete && (
+              {actionButtons && (
                 <th className="border-b border-Tableline border-opacity-30 px-6 py-4.5 text-center text-[12px] font-semibold text-gray-600">
                   Action
                 </th>
@@ -96,21 +48,10 @@ function DataTable({ columns, data, onDelete, onEdit, onRefresh }) {
                     {item[column.key]}
                   </td>
                 ))}
-                {onDelete && (
+                {actionButtons && (
                   <td className="px-4 py-4">
                     <div className="flex items-center justify-center space-x-2">
-                      <button
-                        onClick={() => handleEdit(item)}
-                        className="flex items-center justify-center w-8 h-8 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-Tableline border-opacity-30"
-                      >
-                        <SquarePen className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item)}
-                        className="flex items-center justify-center w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100 border border-Tableline border-opacity-30"
-                      >
-                        <ArchiveRestore className="h-4 w-4" />
-                      </button>
+                      {actionButtons(item)}
                     </div>
                   </td>
                 )}
@@ -138,16 +79,6 @@ function DataTable({ columns, data, onDelete, onEdit, onRefresh }) {
           ))}
         </div>
       )}
-
-      {isEditModalOpen && (
-        <EditServiceModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          service={selectedItem}
-          onServiceEdited={handleServiceEdited}
-          initialData={selectedItem}
-        />
-      )}
     </div>
   );
 }
@@ -160,9 +91,8 @@ DataTable.propTypes = {
     })
   ).isRequired,
   data: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onEdit: PropTypes.func,
-  onDelete: PropTypes.func,
-  onRefresh: PropTypes.func,
+  actionButtons: PropTypes.func,
+  itemsPerPage: PropTypes.number,
 };
 
 export default DataTable;

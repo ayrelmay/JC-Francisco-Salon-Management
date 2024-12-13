@@ -5,6 +5,8 @@ import SearchBar from "../../components/Global/SearchBar";
 import ActionButtons from "../../components/Global/ActionButtons";
 import ConfirmationModal from "../../components/Global/ConfirmationModal";
 import SuccessfulToast from "../../components/Global/SuccessfulToast";
+import { SquarePen, ArchiveRestore } from "lucide-react";
+import EditServiceModal from "../../components/Admin/EditServiceModal";
 
 const Services = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,6 +17,8 @@ const Services = () => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState(null);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
 
   const API_URL = "http://localhost:3000/api/service";
 
@@ -98,6 +102,11 @@ const Services = () => {
     }, 3000);
   };
 
+  const handleEdit = (service) => {
+    setSelectedService(service);
+    setIsEditModalOpen(true);
+  };
+
   const columns = [
     { key: "Id", header: "Service ID" },
     { key: "ServiceName", header: "Service Name" },
@@ -106,10 +115,28 @@ const Services = () => {
     { key: "Category", header: "Category" },
   ];
 
-  const filteredServicesOffer = servicesOffer.filter(
+  const filteredData = servicesOffer.filter(
     (service) =>
-      service.ServiceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.Id?.toLowerCase().includes(searchTerm.toLowerCase())
+      service.archived === 1 &&
+      (service.ServiceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.Id?.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const renderActionButtons = (service) => (
+    <>
+      <button
+        onClick={() => handleEdit(service)}
+        className="flex items-center justify-center w-8 h-8 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-Tableline border-opacity-30"
+      >
+        <SquarePen className="h-4 w-4" />
+      </button>
+      <button
+        onClick={() => handleDelete(service)}
+        className="flex items-center justify-center w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100 border border-Tableline border-opacity-30"
+      >
+        <ArchiveRestore className="h-4 w-4" />
+      </button>
+    </>
   );
 
   return (
@@ -132,11 +159,9 @@ const Services = () => {
           </div>
 
           <DataTable
-            title="Services"
             columns={columns}
-            data={filteredServicesOffer}
-            onDelete={handleDelete}
-            onRefresh={handleServiceEdited}
+            data={filteredData}
+            actionButtons={renderActionButtons}
           />
         </>
       )}
@@ -161,6 +186,16 @@ const Services = () => {
           message="Service Updated"
           subMessage="Service Updated"
           onClose={() => setShowSuccessToast(false)}
+        />
+      )}
+
+      {isEditModalOpen && (
+        <EditServiceModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          service={selectedService}
+          onServiceEdited={handleServiceEdited}
+          initialData={selectedService}
         />
       )}
     </div>
