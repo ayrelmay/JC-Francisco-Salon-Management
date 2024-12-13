@@ -1,6 +1,5 @@
 const express = require("express");
 const db = require("../db"); // Import the database connection
-
 const router = express.Router();
 
 // Fetch all services
@@ -26,6 +25,8 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Failed to retrieve services" });
   }
 });
+
+//
 router.get("/next-id", async (req, res) => {
   try {
     // Query the last inserted ID from the database
