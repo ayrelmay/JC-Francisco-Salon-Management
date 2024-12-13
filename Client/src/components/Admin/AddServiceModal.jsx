@@ -175,8 +175,8 @@ export default function AddServiceModal({ onClose, onServiceAdded }) {
                 <option value="">Choose a category</option>
                 <option value="Hair">Hair</option>
                 <option value="Nails">Nails</option>
-                <option value="Skin">Skin</option>
-                <option value="Massage">Massage</option>
+                <option value="Beauty">Beauty</option>
+                <option value="Spa">Spa</option>
               </select>
             </div>
             <div>
