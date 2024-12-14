@@ -5,6 +5,7 @@ require("dotenv").config();
 
 const serviceRoutes = require("./routes/serviceRoutes"); // Import service routes
 const paymentRoutes = require("./routes/paymentRoutes"); // Import payment routes
+const paymentDetailsRoutes = require("./routes/paymentDetailsRoute"); // Import payment details routes
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,6 +17,7 @@ app.use(bodyParser.json());
 // Routes
 app.use("/api/service", serviceRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/paymentdetails", paymentDetailsRoutes);
 
 // Start the server
 app.listen(PORT, () => {
