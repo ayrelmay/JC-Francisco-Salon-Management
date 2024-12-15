@@ -71,24 +71,29 @@ const AppointmentTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch appointments
         const appointmentsResponse = await fetch(
           "http://localhost:3000/api/appointments"
         );
         const appointmentsData = await appointmentsResponse.json();
 
+        // Fetch services
         const servicesResponse = await fetch(
           "http://localhost:3000/api/apptservices"
         );
         const servicesData = await servicesResponse.json();
 
-        // Create a map of booking_id to service details
+        console.log("Appointments Data:", appointmentsData); // Debug log
+        console.log("Services Data:", servicesData); // Debug log
+
+        // Create a map of appointment_id to service_name
         const serviceMap = {};
         servicesData.forEach((service) => {
-          serviceMap[service.appointment_id] = {
-            name: service.service_name,
-            category: service.category,
-          };
+          console.log("Mapping service:", service); // Debug log
+          serviceMap[service.appointment_id] = service.service_name;
         });
+
+        console.log("Service Map:", serviceMap); // Debug log
 
         setServices(serviceMap);
         setData(appointmentsData);
@@ -163,7 +168,7 @@ const AppointmentTable = () => {
               ); // Debug log
               return (
                 <tr
-                  key={appointment.booking_id}
+                  key={appointment.id}
                   className="text-left border-b border-Tableline border-opacity-50 hover:bg-gray-50"
                 >
                   <td className="px-6 py-4 text-[12px] text-gray-600">
@@ -180,19 +185,8 @@ const AppointmentTable = () => {
                       {appointment.email}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    {services[appointment.booking_id] ? (
-                      <>
-                        <div className="text-[12px] font-medium text-gray-600">
-                          {services[appointment.booking_id].name}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {services[appointment.booking_id].category}
-                        </div>
-                      </>
-                    ) : (
-                      "No service"
-                    )}
+                  <td className="px-6 py-4 text-[12px] text-gray-600">
+                    {services[appointment.id] || "No service"}
                   </td>
                   <td className="px-6 py-4 text-[12px] text-gray-600">
                     {appointment.stylist}
