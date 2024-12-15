@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MoreHorizontal } from "lucide-react";
+import ActionDropdown from "../Global/ActionDropdown";
 
 const AppointmentTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -211,7 +211,10 @@ const AppointmentTable = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <MoreHorizontal className="h-5 w-5 mx-auto text-gray-400 hover:text-gray-600 cursor-pointer" />
+                    <ActionDropdown
+                      appointmentId={appointment.booking_id}
+                      status={appointment.status}
+                    />
                   </td>
                 </tr>
               );
