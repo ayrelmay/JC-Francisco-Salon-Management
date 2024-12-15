@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import ActionDropdown from "../Global/ActionDropdown";
+import ViewAptModal from "../Admin/ViewAptModal.Jsx";
 
 const AppointmentTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -8,6 +9,13 @@ const AppointmentTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const itemsPerPage = 6;
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+
+  const handleViewDetails = (appointment) => {
+    setSelectedAppointment(appointment);
+    setIsViewModalOpen(true);
+  };
 
   const formatDate = (dateString, timeString) => {
     const today = new Date();
@@ -212,8 +220,9 @@ const AppointmentTable = () => {
                   </td>
                   <td className="px-6 py-4 text-center">
                     <ActionDropdown
-                      appointmentId={appointment.booking_id}
-                      status={appointment.status}
+                      onCancel={() => console.log("Cancel clicked")}
+                      onEdit={() => console.log("Edit clicked")}
+                      onViewDetails={() => handleViewDetails(appointment)}
                     />
                   </td>
                 </tr>
@@ -240,6 +249,14 @@ const AppointmentTable = () => {
             </button>
           ))}
         </div>
+      )}
+
+      {isViewModalOpen && selectedAppointment && (
+        <ViewAptModal
+          appointment={selectedAppointment}
+          service={services[selectedAppointment.booking_id]}
+          onClose={() => setIsViewModalOpen(false)}
+        />
       )}
     </div>
   );

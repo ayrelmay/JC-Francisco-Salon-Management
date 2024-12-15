@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import PropTypes from "prop-types";
 import { MoreHorizontal } from "lucide-react";
+import PropTypes from "prop-types";
 
 const ActionDropdown = ({ onCancel, onEdit, onViewDetails }) => {
   const [isOpen, setIsOpen] = useState(false);
