@@ -71,29 +71,24 @@ const AppointmentTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch appointments
         const appointmentsResponse = await fetch(
           "http://localhost:3000/api/appointments"
         );
         const appointmentsData = await appointmentsResponse.json();
 
-        // Fetch services
         const servicesResponse = await fetch(
           "http://localhost:3000/api/apptservices"
         );
         const servicesData = await servicesResponse.json();
 
-        console.log("Appointments Data:", appointmentsData); // Debug log
-        console.log("Services Data:", servicesData); // Debug log
-
-        // Create a map of appointment_id to service_name
+        // Create a map of booking_id to service details
         const serviceMap = {};
         servicesData.forEach((service) => {
-          console.log("Mapping service:", service); // Debug log
-          serviceMap[service.appointment_id] = service.service_name;
+          serviceMap[service.appointment_id] = {
+            name: service.service_name,
+            category: service.category,
+          };
         });
-
-        console.log("Service Map:", serviceMap); // Debug log
 
         setServices(serviceMap);
         setData(appointmentsData);
@@ -109,13 +104,16 @@ const AppointmentTable = () => {
   }, []);
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case "active":
+    console.log("Status received:", status); // Keep for debugging
+    const trimmedStatus = status.trim(); // Keep the trim for whitespace handling
+
+    switch (trimmedStatus) {
+      case "Active":
         return "bg-green bg-opacity-25 text-green border-green";
-      case "cancelled":
+      case "Cancelled":
         return "bg-red bg-opacity-25 text-red border-red";
-      case "completed":
-        return "bg-blue bg-opacity-25 text-blue border-blue";
+      case "Completed":
+        return "bg-Blue bg-opacity-25 text-Blue border-Blue";
       default:
         return "bg-gray-50 text-gray-600 border-gray-200";
     }
@@ -168,7 +166,7 @@ const AppointmentTable = () => {
               ); // Debug log
               return (
                 <tr
-                  key={appointment.id}
+                  key={appointment.booking_id}
                   className="text-left border-b border-Tableline border-opacity-50 hover:bg-gray-50"
                 >
                   <td className="px-6 py-4 text-[12px] text-gray-600">
@@ -185,8 +183,19 @@ const AppointmentTable = () => {
                       {appointment.email}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-[12px] text-gray-600">
-                    {services[appointment.id] || "No service"}
+                  <td className="px-6 py-4">
+                    {services[appointment.booking_id] ? (
+                      <>
+                        <div className="text-[12px] font-medium text-gray-600">
+                          {services[appointment.booking_id].name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {services[appointment.booking_id].category}
+                        </div>
+                      </>
+                    ) : (
+                      "No service"
+                    )}
                   </td>
                   <td className="px-6 py-4 text-[12px] text-gray-600">
                     {appointment.stylist}
