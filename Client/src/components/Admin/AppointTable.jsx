@@ -1,10 +1,107 @@
-import PropTypes from "prop-types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MoreHorizontal } from "lucide-react";
 
-const AppointmentTable = ({ data }) => {
+const AppointmentTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 7;
+  const [data, setData] = useState([]);
+  const [services, setServices] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const itemsPerPage = 6;
+
+  const formatDate = (dateString, timeString) => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const appointmentDate = new Date(dateString);
+
+    // Format time (convert "10:00:00" to "10:00 am")
+    const formattedTime = new Date(`2000-01-01T${timeString}`)
+      .toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })
+      .toLowerCase();
+
+    // Check if date is today
+    if (
+      appointmentDate.getDate() === today.getDate() &&
+      appointmentDate.getMonth() === today.getMonth() &&
+      appointmentDate.getFullYear() === today.getFullYear()
+    ) {
+      return (
+        <>
+          <div className="font-medium">Today</div>
+          <div className="text-xs text-gray-500">{formattedTime}</div>
+        </>
+      );
+    }
+
+    // Check if date is tomorrow
+    if (
+      appointmentDate.getDate() === tomorrow.getDate() &&
+      appointmentDate.getMonth() === tomorrow.getMonth() &&
+      appointmentDate.getFullYear() === tomorrow.getFullYear()
+    ) {
+      return (
+        <>
+          <div className="font-medium">Tomorrow</div>
+          <div className="text-xs text-gray-500">{formattedTime}</div>
+        </>
+      );
+    }
+
+    // For other dates
+    const formattedDate = appointmentDate.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    return (
+      <>
+        <div className="font-medium">{formattedDate}</div>
+        <div className="text-xs text-gray-500">{formattedTime}</div>
+      </>
+    );
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const appointmentsResponse = await fetch(
+          "http://localhost:3000/api/appointments"
+        );
+        const appointmentsData = await appointmentsResponse.json();
+
+        const servicesResponse = await fetch(
+          "http://localhost:3000/api/apptservices"
+        );
+        const servicesData = await servicesResponse.json();
+
+        // Create a map of booking_id to service details
+        const serviceMap = {};
+        servicesData.forEach((service) => {
+          serviceMap[service.appointment_id] = {
+            name: service.service_name,
+            category: service.category,
+          };
+        });
+
+        setServices(serviceMap);
+        setData(appointmentsData);
+        setLoading(false);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -23,79 +120,99 @@ const AppointmentTable = ({ data }) => {
     setCurrentPage(page);
   };
 
-  // Pagination logic
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(data.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedData = data.slice(startIndex, endIndex);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="w-full">
       <div className="overflow-x-auto rounded-lg border border-Tableline border-opacity-30">
-        <table className="w-full table-auto">
+        <table className="w-full table-fixed">
           <thead className="bg-gray-50">
             <tr>
-              <th className="border-b border-Tableline border-opacity-30 px-6 py-4 text-left text-[12px] font-semibold text-gray-600">
+              <th className="w-[150px] border-b border-Tableline border-opacity-30 px-6 py-4 text-left text-[12px] font-semibold text-gray-600">
                 Date
               </th>
-              <th className="border-b border-Tableline border-opacity-30 px-6 py-4 text-left text-[12px] font-semibold text-gray-600">
+              <th className="w-[250px] border-b border-Tableline border-opacity-30 px-6 py-4 text-left text-[12px] font-semibold text-gray-600">
                 Name
               </th>
-              <th className="border-b border-Tableline border-opacity-30 px-6 py-4 text-left text-[12px] font-semibold text-gray-600">
+              <th className="w-[200px] border-b border-Tableline border-opacity-30 px-6 py-4 text-left text-[12px] font-semibold text-gray-600">
                 Service Type
               </th>
-              <th className="border-b border-Tableline border-opacity-30 px-6 py-4 text-left text-[12px] font-semibold text-gray-600">
+              <th className="w-[150px] border-b border-Tableline border-opacity-30 px-6 py-4 text-left text-[12px] font-semibold text-gray-600">
                 Beauty Tech
               </th>
-              <th className="border-b border-Tableline border-opacity-30 px-6 py-4 text-left text-[12px] font-semibold text-gray-600">
+              <th className="w-[120px] border-b border-Tableline border-opacity-30 px-6 py-4 text-left text-[12px] font-semibold text-gray-600">
                 Status
               </th>
-              <th className="border-b border-Tableline border-opacity-30 px-6 py-4 text-center text-[12px] font-semibold text-gray-600">
+              <th className="w-[80px] border-b border-Tableline border-opacity-30 px-6 py-4 text-center text-[12px] font-semibold text-gray-600">
                 Action
               </th>
             </tr>
           </thead>
           <tbody className="bg-white">
-            {paginatedData.map((appointment) => (
-              <tr
-                key={appointment.id}
-                className="text-left border-b border-Tableline border-opacity-50 transition-colors hover:bg-gray-50"
-              >
-                <td className="px-6 py-4 text-[12px] text-gray-600">
-                  {appointment.date}
-                  <div className="text-xs text-gray-500">
-                    {appointment.time}
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-[12px] text-gray-600">
-                  {appointment.name}
-                  <div className="text-xs text-gray-500">
-                    {appointment.email}
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-[12px] text-gray-600">
-                  {appointment.serviceType}
-                  <div className="text-xs text-gray-500">
-                    {appointment.serviceDetail}
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-[12px] text-gray-600">
-                  {appointment.beautyTech}
-                </td>
-                <td className="px-6 py-4 text-[12px]">
-                  <span
-                    className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusColor(
-                      appointment.status
-                    )}`}
-                  >
-                    {appointment.status.charAt(0).toUpperCase() +
-                      appointment.status.slice(1)}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-center">
-                  <MoreHorizontal className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                </td>
-              </tr>
-            ))}
+            {paginatedData.map((appointment) => {
+              console.log("Appointment ID:", appointment.id); // Debug log
+              console.log(
+                "Service for this appointment:",
+                services[appointment.id]
+              ); // Debug log
+              return (
+                <tr
+                  key={appointment.booking_id}
+                  className="text-left border-b border-Tableline border-opacity-50 hover:bg-gray-50"
+                >
+                  <td className="px-6 py-4 text-[12px] text-gray-600">
+                    {formatDate(
+                      appointment.appointment_date,
+                      appointment.appointment_time
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-[12px] text-gray-600">
+                      {appointment.full_name}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {appointment.email}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {services[appointment.booking_id] ? (
+                      <>
+                        <div className="text-[12px] font-medium text-gray-600">
+                          {services[appointment.booking_id].name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {services[appointment.booking_id].category}
+                        </div>
+                      </>
+                    ) : (
+                      "No service"
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-[12px] text-gray-600">
+                    {appointment.stylist}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusColor(
+                        appointment.status
+                      )}`}
+                    >
+                      {appointment.status.charAt(0).toUpperCase() +
+                        appointment.status.slice(1)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <MoreHorizontal className="h-5 w-5 mx-auto text-gray-400 hover:text-gray-600 cursor-pointer" />
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -120,10 +237,6 @@ const AppointmentTable = ({ data }) => {
       )}
     </div>
   );
-};
-
-AppointmentTable.propTypes = {
-  data: PropTypes.array.isRequired,
 };
 
 export default AppointmentTable;
