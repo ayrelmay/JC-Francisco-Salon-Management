@@ -7,6 +7,7 @@ const serviceRoutes = require("./routes/serviceRoutes"); // Import service route
 const paymentRoutes = require("./routes/paymentRoutes"); // Import payment routes
 const paymentDetailsRoutes = require("./routes/paymentDetailsRoute"); // Import payment details routes
 const appointmentRoutes = require("./routes/appointmentRoutes"); // Import appointment routes
+const apptServicesRoutes = require("./routes/apptServicesRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,7 @@ app.use("/api/service", serviceRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/paymentdetails", paymentDetailsRoutes);
 app.use("/api/appointments", appointmentRoutes);
+app.use("/api/apptservices", apptServicesRoutes);
 
 // Start the server
 app.listen(PORT, () => {
