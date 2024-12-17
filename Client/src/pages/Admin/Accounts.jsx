@@ -1,52 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Plus } from "lucide-react";
-import AccountTable from "../../components/Admin/AccountTable"; // Adjust the path as needed
+import AccountTable from "../../components/Admin/AccountTable";
+import NewEmployee from "../../components/Admin/NewEmployee";
 
 const Accounts = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [employees, setEmployees] = useState([]);
+  const [isNewEmployeeModalOpen, setIsNewEmployeeModalOpen] = useState(false);
 
-  const employees = [
-    {
-      id: "EMP001",
-      name: "Ithel Mae Antang",
-      role: "Cashier",
-      email: "ayrel@jcfmail.com",
-      recentAct: "Log, Today 9am",
-      status: "Available",
-    },
-    {
-      id: "EMP002",
-      name: "Marcus Chen",
-      role: "Tech",
-      email: "march@jcfmail.com",
-      recentAct: "Log, Today 10am",
-      status: "Busy",
-    },
-    {
-      id: "EMP003",
-      name: "Leah Thompson",
-      role: "Tech",
-      email: "leaht@jcfmail.com",
-      recentAct: "Log, Today 11am",
-      status: "Break",
-    },
-    {
-      id: "EMP004",
-      name: "Ethan Sison",
-      role: "Tech",
-      email: "ethans@jcfmail.com",
-      recentAct: "Log, Today 10am",
-      status: "Available",
-    },
-    {
-      id: "EMP005",
-      name: "Chloe Danas",
-      role: "Tech",
-      email: "chloed@jcfmail.com",
-      recentAct: "Log, Today 11am",
-      status: "Available",
-    },
-  ];
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/employee");
+        if (!response.ok) throw new Error("Failed to fetch");
+        const data = await response.json();
+        setEmployees(data);
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+        // Handle error appropriately
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   // Filter employees based on search term
   const filteredEmployees = employees.filter((employee) =>
@@ -57,7 +33,6 @@ const Accounts = () => {
 
   return (
     <div className="p-8">
-      {/* Search and Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
         <div className="relative flex-1 max-w-md">
           <input
@@ -69,14 +44,21 @@ const Accounts = () => {
           />
           <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </div>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2">
+        <button
+          onClick={() => setIsNewEmployeeModalOpen(true)}
+          className="px-4 py-2 bg-BtnPrimary text-white rounded-md flex items-center gap-2"
+        >
           <Plus className="h-4 w-4" />
           New employee
         </button>
       </div>
 
-      {/* Employees Table */}
       <AccountTable data={filteredEmployees} />
+
+      <NewEmployee
+        isOpen={isNewEmployeeModalOpen}
+        onClose={() => setIsNewEmployeeModalOpen(false)}
+      />
     </div>
   );
 };
