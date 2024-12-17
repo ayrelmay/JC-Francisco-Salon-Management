@@ -8,6 +8,8 @@ const paymentRoutes = require("./routes/paymentRoutes"); // Import payment route
 const paymentDetailsRoutes = require("./routes/paymentDetailsRoute"); // Import payment details routes
 const appointmentRoutes = require("./routes/appointmentRoutes"); // Import appointment routes
 const apptServicesRoutes = require("./routes/apptServicesRoutes");
+const aptTimeRoute = require("./routes/aptTimeRoute");
+const employeeRoutes = require("./routes/employeeRoute");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,7 +24,8 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/paymentdetails", paymentDetailsRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/apptservices", apptServicesRoutes);
-
+app.use("/api/appointment_time", aptTimeRoute);
+app.use("/api/employee", employeeRoutes);
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

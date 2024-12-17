@@ -1,7 +1,12 @@
 import { X, CalendarClock } from "lucide-react";
 import PropTypes from "prop-types";
 
-export default function ViewAptModal({ appointment, service, onClose }) {
+export default function ViewAptModal({
+  appointment,
+  service,
+  onClose,
+  stylistName,
+}) {
   // Format the date for display
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -154,7 +159,7 @@ export default function ViewAptModal({ appointment, service, onClose }) {
                 </label>
                 <input
                   type="text"
-                  value={appointment.stylist}
+                  value={stylistName || "Unknown"}
                   readOnly
                   className="w-full px-4 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50"
                 />
@@ -183,4 +188,5 @@ ViewAptModal.propTypes = {
     category: PropTypes.string,
   }),
   onClose: PropTypes.func.isRequired,
+  stylistName: PropTypes.string,
 };

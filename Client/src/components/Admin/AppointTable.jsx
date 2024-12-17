@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import ActionDropdown from "../Global/ActionDropdown";
 import ViewAptModal from "../Admin/ViewAptModal.Jsx";
+import EditAppointmentModal from "./EditAppointmentModal";
 
 const AppointmentTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -10,11 +11,18 @@ const AppointmentTable = () => {
   const [error, setError] = useState(null);
   const itemsPerPage = 6;
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [employees, setEmployees] = useState({});
 
   const handleViewDetails = (appointment) => {
     setSelectedAppointment(appointment);
     setIsViewModalOpen(true);
+  };
+
+  const handleEdit = (appointment) => {
+    setSelectedAppointment(appointment);
+    setIsEditModalOpen(true);
   };
 
   const formatDate = (dateString, timeString) => {
@@ -79,17 +87,24 @@ const AppointmentTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const appointmentsResponse = await fetch(
-          "http://localhost:3000/api/appointments"
-        );
+        const [appointmentsResponse, servicesResponse, employeesResponse] =
+          await Promise.all([
+            fetch("http://localhost:3000/api/appointments"),
+            fetch("http://localhost:3000/api/apptservices"),
+            fetch("http://localhost:3000/api/employee"),
+          ]);
+
         const appointmentsData = await appointmentsResponse.json();
-
-        const servicesResponse = await fetch(
-          "http://localhost:3000/api/apptservices"
-        );
         const servicesData = await servicesResponse.json();
+        const employeesData = await employeesResponse.json();
 
-        // Create a map of booking_id to service details
+        // Create a map of employee_id to employee name
+        const employeeMap = {};
+        employeesData.forEach((employee) => {
+          employeeMap[employee.ID] = employee.name;
+        });
+
+        // Create services map (existing code)
         const serviceMap = {};
         servicesData.forEach((service) => {
           serviceMap[service.appointment_id] = {
@@ -98,6 +113,7 @@ const AppointmentTable = () => {
           };
         });
 
+        setEmployees(employeeMap);
         setServices(serviceMap);
         setData(appointmentsData);
         setLoading(false);
@@ -206,7 +222,7 @@ const AppointmentTable = () => {
                     )}
                   </td>
                   <td className="px-6 py-4 text-[12px] text-gray-600">
-                    {appointment.stylist}
+                    {employees[appointment.stylist_id] || "Unknown"}
                   </td>
                   <td className="px-6 py-4">
                     <span
@@ -221,7 +237,7 @@ const AppointmentTable = () => {
                   <td className="px-6 py-4 text-center">
                     <ActionDropdown
                       onCancel={() => console.log("Cancel clicked")}
-                      onEdit={() => console.log("Edit clicked")}
+                      onEdit={() => handleEdit(appointment)}
                       onViewDetails={() => handleViewDetails(appointment)}
                     />
                   </td>
@@ -255,7 +271,24 @@ const AppointmentTable = () => {
         <ViewAptModal
           appointment={selectedAppointment}
           service={services[selectedAppointment.booking_id]}
+          stylistName={employees[selectedAppointment.stylist_id]}
           onClose={() => setIsViewModalOpen(false)}
+        />
+      )}
+
+      {isEditModalOpen && selectedAppointment && (
+        <EditAppointmentModal
+          initialData={selectedAppointment}
+          service={services[selectedAppointment.booking_id]}
+          onClose={() => setIsEditModalOpen(false)}
+          onServiceEdited={(updatedData) => {
+            setData(
+              data.map((item) =>
+                item.booking_id === updatedData.booking_id ? updatedData : item
+              )
+            );
+            setIsEditModalOpen(false);
+          }}
         />
       )}
     </div>
