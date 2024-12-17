@@ -7,11 +7,18 @@ router.get("/", async (req, res) => {
   let connection;
   try {
     connection = await pool.getConnection();
-    const [rows] = await connection.query("SELECT * FROM invoice");
+    const archived = req.query.archived === "1";
+
+    const [rows] = await connection.query(
+      "SELECT * FROM invoice WHERE archived = ?",
+      [archived]
+    );
     res.json(rows);
   } catch (error) {
     console.error("Error fetching invoices:", error);
     res.status(500).json({ message: "Error fetching invoices" });
+  } finally {
+    if (connection) connection.release();
   }
 });
 
@@ -107,6 +114,51 @@ router.post("/", async (req, res) => {
       message: "Error creating invoice",
       error: error.message,
     });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+// Update archive single invoice route
+router.patch("/:id/archived", async (req, res) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    const [result] = await connection.query(
+      "UPDATE invoice SET archived = 1 WHERE invoice_id = ?",
+      [req.params.id]
+    );
+
+    if (result.affectedRows > 0) {
+      res.json({ message: "Invoice archived successfully" });
+    } else {
+      res.status(404).json({ message: "Invoice not found" });
+    }
+  } catch (error) {
+    console.error("Error archiving invoice:", error);
+    res.status(500).json({ message: "Error archiving invoice" });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+// Update bulk archive route
+router.patch("/bulk-archive", async (req, res) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    const [result] = await connection.query(
+      "UPDATE invoice SET archived = 1 WHERE archived = 0 OR archived IS NULL"
+    );
+
+    if (result.affectedRows > 0) {
+      res.json({ message: "Invoices archived successfully" });
+    } else {
+      res.json({ message: "No invoices to archive" });
+    }
+  } catch (error) {
+    console.error("Error archiving invoices:", error);
+    res.status(500).json({ message: "Error archiving invoices" });
   } finally {
     if (connection) connection.release();
   }

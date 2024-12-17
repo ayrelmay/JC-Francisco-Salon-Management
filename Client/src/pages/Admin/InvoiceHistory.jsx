@@ -1,35 +1,46 @@
 import { Search, Filter } from "lucide-react";
-import { useState } from "react";
-//import DataTable from "../../components/Global/datatable"; // Assuming this is the correct path for the new component
+import { useState, useEffect } from "react";
 import ClickableTable from "../../components/Global/ClickableTable";
+import ConfirmationModal from "../../components/Global/ConfirmationModal";
 
 const InvoiceHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [selectedInvoice] = useState(null);
-  // const [selectedInvoice, setSelectedInvoice] = useState(null); //with clickable data
+  const [invoices, setInvoices] = useState([]);
+  const [showArchiveConfirmation, setShowArchiveConfirmation] = useState(false);
+  const [invoiceToArchive, setInvoiceToArchive] = useState(null);
+  const [showArchived, setShowArchived] = useState(false);
 
-  const invoices = [
-    {
-      id: "INV24112601",
-      customerName: "Cathy Capistrano",
-      date: "November 26, 2024",
-      amount: "Php 4,000.00",
-    },
-    {
-      id: "INV24112602",
-      customerName: "John Doe",
-      date: "November 27, 2024",
-      amount: "Php 2,500.00",
-    },
-    {
-      id: "INV24112603",
-      customerName: "Jane Smith",
-      date: "November 28, 2024",
-      amount: "Php 5,000.00",
-    },
-    // Add more invoices as needed
-  ];
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/invoice?archived=${showArchived ? 1 : 0}`
+        );
+        const data = await response.json();
+
+        const formattedInvoices = data.map((invoice) => ({
+          id: invoice.invoice_id,
+          customerName: invoice.customer_name,
+          date: new Date(invoice.created_at).toLocaleDateString(),
+          amount: `Php ${parseFloat(invoice.total_amount).toLocaleString(
+            "en-US",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }
+          )}`,
+        }));
+
+        setInvoices(formattedInvoices);
+      } catch (error) {
+        console.error("Error fetching invoices:", error);
+      }
+    };
+
+    fetchInvoices();
+  }, [showArchived]);
 
   const columns = [
     { key: "id", header: "Invoice ID" },
@@ -37,6 +48,41 @@ const InvoiceHistory = () => {
     { key: "date", header: "Date" },
     { key: "amount", header: "Amount" },
   ];
+
+  const handleArchiveClick = (item) => {
+    setInvoiceToArchive(item);
+    setShowArchiveConfirmation(true);
+  };
+
+  const handleArchiveConfirm = async () => {
+    if (!invoiceToArchive) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/invoice/${invoiceToArchive.id}/archived  `,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const updatedInvoices = invoices.filter(
+          (invoice) => invoice.id !== invoiceToArchive.id
+        );
+        setInvoices(updatedInvoices);
+      } else {
+        console.error("Failed to archive invoice");
+      }
+    } catch (error) {
+      console.error("Error archiving invoice:", error);
+    } finally {
+      setShowArchiveConfirmation(false);
+      setInvoiceToArchive(null);
+    }
+  };
 
   return (
     <div className="p-8">
@@ -57,8 +103,15 @@ const InvoiceHistory = () => {
             <Filter className="h-4 w-4" />
             Filter
           </button>
-          <button className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
-            Archive
+          <button
+            onClick={() => setShowArchived(!showArchived)}
+            className={`px-4 py-2 border rounded-md transition-colors ${
+              showArchived
+                ? "bg-gray-800 text-white border-gray-800"
+                : "border-gray-300 hover:bg-gray-50"
+            }`}
+          >
+            {showArchived ? "Show Active" : "Show Archived"}
           </button>
         </div>
       </div>
@@ -67,10 +120,16 @@ const InvoiceHistory = () => {
       <ClickableTable
         columns={columns}
         data={invoices}
-        onArchive={(item) => {
-          // Handle archive action
-          console.log("Archive item:", item);
-        }}
+        onArchive={handleArchiveClick}
+      />
+
+      <ConfirmationModal
+        isOpen={showArchiveConfirmation}
+        onClose={() => setShowArchiveConfirmation(false)}
+        onConfirm={handleArchiveConfirm}
+        message="Are you sure you want to archive this receipt?"
+        cancelButtonText="Cancel"
+        confirmButtonText="Archive"
       />
 
       {/* Modal Placeholder */}
