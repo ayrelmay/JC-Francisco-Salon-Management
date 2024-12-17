@@ -52,6 +52,7 @@ export default function ServiceSummary({
 
   const handleSave = async () => {
     try {
+      // First save payment details
       const paymentData = {
         TotalAmount: parseFloat(total || 0).toFixed(2),
         AdditionalFee: parseFloat(additionalFee || 0).toFixed(2),
@@ -59,58 +60,111 @@ export default function ServiceSummary({
         ChangeGiven: parseFloat(change || 0).toFixed(2),
       };
 
-      // First update the payment details in the payments table
+      console.log("Saving payment data:", paymentData);
       const paymentResponse = await fetch(
         `http://localhost:3000/api/payment/${id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(paymentData),
         }
       );
 
-      // Log the raw response for debugging
-      console.log(
-        "Raw payment response:",
-        await paymentResponse.text().catch(() => "Failed to get response text")
+      if (!paymentResponse.ok) {
+        throw new Error(
+          `Payment save failed with status: ${paymentResponse.status}`
+        );
+      }
+
+      // Then create invoice
+      const invoiceData = {
+        paymentId: id,
+        customerName: paymentDetails.CustomerName,
+        totalAmount: parseFloat(total).toFixed(2),
+        amountPaid: parseFloat(amountPaid).toFixed(2),
+        changeGiven: parseFloat(change).toFixed(2),
+        status: "completed",
+      };
+
+      console.log("Creating invoice with data:", invoiceData);
+      const invoiceResponse = await fetch("http://localhost:3000/api/invoice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(invoiceData),
+      });
+
+      const responseData = await invoiceResponse.json();
+      console.log("Invoice response:", responseData);
+
+      if (!invoiceResponse.ok) {
+        throw new Error(`Invoice creation failed: ${responseData.message}`);
+      }
+
+      alert(
+        `Payment and invoice details saved successfully. Invoice ID: ${responseData.invoiceId}`
+      );
+    } catch (error) {
+      console.error("Error saving details:", error);
+      alert(`Failed to save details: ${error.message}`);
+    }
+  };
+
+  const handlePayNow = async () => {
+    try {
+      // First save payment details
+      const paymentData = {
+        TotalAmount: parseFloat(total || 0).toFixed(2),
+        AdditionalFee: parseFloat(additionalFee || 0).toFixed(2),
+        AmountPaid: parseFloat(amountPaid || 0).toFixed(2),
+        ChangeGiven: parseFloat(change || 0).toFixed(2),
+      };
+
+      console.log("Saving payment data:", paymentData);
+      const paymentResponse = await fetch(
+        `http://localhost:3000/api/payment/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(paymentData),
+        }
       );
 
       if (!paymentResponse.ok) {
         throw new Error(
-          `Payment update failed with status: ${paymentResponse.status}`
+          `Payment save failed with status: ${paymentResponse.status}`
         );
       }
 
-      // Then save the services in paymentdetails table
-      const servicesResponse = await fetch(
-        `http://localhost:3000/api/paymentdetails/save/${id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ services: selectedServices }),
-        }
-      );
+      // Then create invoice
+      const invoiceData = {
+        paymentId: id,
+        customerName: paymentDetails.CustomerName,
+        totalAmount: parseFloat(total).toFixed(2),
+        amountPaid: parseFloat(amountPaid).toFixed(2),
+        changeGiven: parseFloat(change).toFixed(2),
+        status: "completed",
+      };
 
-      // Log the raw response for debugging
-      console.log(
-        "Raw services response:",
-        await servicesResponse.text().catch(() => "Failed to get response text")
-      );
+      console.log("Creating invoice with data:", invoiceData);
+      const invoiceResponse = await fetch("http://localhost:3000/api/invoice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(invoiceData),
+      });
 
-      if (!servicesResponse.ok) {
-        throw new Error(
-          `Services update failed with status: ${servicesResponse.status}`
-        );
+      const responseData = await invoiceResponse.json();
+      console.log("Invoice response:", responseData);
+
+      if (!invoiceResponse.ok) {
+        throw new Error(`Invoice creation failed: ${responseData.message}`);
       }
 
-      alert("Payment details saved successfully");
+      alert(
+        `Payment and invoice details saved successfully. Invoice ID: ${responseData.invoiceId}`
+      );
     } catch (error) {
-      console.error("Error saving payment details:", error);
-      alert(`Failed to save payment details: ${error.message}`);
+      console.error("Error saving details:", error);
+      alert(`Failed to save details: ${error.message}`);
     }
   };
 
@@ -246,7 +300,10 @@ export default function ServiceSummary({
         >
           Save
         </button>
-        <button className="flex-1 px-4 py-2 bg-BtnPrimary text-white rounded-md hover:bg-gray-800">
+        <button
+          onClick={handlePayNow}
+          className="flex-1 px-4 py-2 bg-BtnPrimary text-white rounded-md hover:bg-gray-800"
+        >
           Pay now
         </button>
       </div>

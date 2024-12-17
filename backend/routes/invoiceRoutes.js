@@ -34,4 +34,82 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// Add this new route to create an invoice
+router.post("/", async (req, res) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    console.log("Received invoice data:", req.body);
+
+    // Validate required fields
+    if (
+      !req.body.paymentId ||
+      !req.body.customerName ||
+      !req.body.totalAmount
+    ) {
+      throw new Error("Missing required fields");
+    }
+
+    // Generate invoice ID
+    const today = new Date();
+    const yy = today.getFullYear().toString().slice(-2);
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    const datePrefix = `INV${yy}${mm}${dd}`;
+
+    // Get the latest sequence
+    const [lastInvoice] = await connection.query(
+      "SELECT invoice_id FROM invoice WHERE invoice_id LIKE ? ORDER BY invoice_id DESC LIMIT 1",
+      [`${datePrefix}%`]
+    );
+
+    console.log("Last invoice:", lastInvoice);
+
+    const sequence = lastInvoice.length
+      ? String(Number(lastInvoice[0].invoice_id.slice(-3)) + 1).padStart(3, "0")
+      : "001";
+
+    const invoiceId = `${datePrefix}${sequence}`;
+    console.log("Generated invoice ID:", invoiceId);
+
+    // Insert new invoice
+    const result = await connection.query(
+      `INSERT INTO invoice (
+        invoice_id, 
+        payment_id, 
+        customer_name, 
+        total_amount, 
+        amount_paid, 
+        change_given, 
+        status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        invoiceId,
+        req.body.paymentId,
+        req.body.customerName,
+        req.body.totalAmount,
+        req.body.amountPaid,
+        req.body.changeGiven,
+        req.body.status || "completed",
+      ]
+    );
+
+    console.log("Insert result:", result);
+
+    res.status(201).json({
+      message: "Invoice created successfully",
+      invoiceId: invoiceId,
+    });
+  } catch (error) {
+    console.error("Error creating invoice:", error);
+    res.status(500).json({
+      message: "Error creating invoice",
+      error: error.message,
+    });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
 module.exports = router;

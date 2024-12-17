@@ -29,7 +29,7 @@ app.use("/api/apptservices", apptServicesRoutes);
 app.use("/api/appointment_time", aptTimeRoute);
 app.use("/api/employee", employeeRoutes);
 app.use("/api/invoicedetails", invoiceDetailsRoutes);
-app.use("/api/invoicee", invoiceRoutes);
+app.use("/api/invoice", invoiceRoutes);
 
 // Start the server
 app.listen(PORT, () => {
