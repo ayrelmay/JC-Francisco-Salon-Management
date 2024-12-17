@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const pool = require("../config/database"); // Assuming you have database configuration
+const pool = require("../db");
 
 // Get all invoices
 router.get("/", async (req, res) => {
+  let connection;
   try {
-    const [rows] = await pool.query("SELECT * FROM invoice");
+    connection = await pool.getConnection();
+    const [rows] = await connection.query("SELECT * FROM invoice");
     res.json(rows);
   } catch (error) {
     console.error("Error fetching invoices:", error);
