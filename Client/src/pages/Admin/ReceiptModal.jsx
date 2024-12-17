@@ -1,23 +1,31 @@
 import PropTypes from "prop-types";
+import { X } from "lucide-react";
 
-export default function ReceiptModal({ isOpen, onClose }) {
+export default function ReceiptModal({
+  isOpen,
+  onClose,
+  paymentData,
+  invoiceId,
+}) {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg w-full max-w-md relative">
+      <div className="bg-white rounded-lg w-full max-w-sm relative">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+          className="absolute right-4 top-4 text-gray-600 hover:text-gray-800"
         >
-          ×
+          <X size={24} />
         </button>
 
         {/* Receipt Content */}
         <div className="p-6">
           {/* Invoice Number */}
-          <h2 className="text-2xl font-bold mb-2">INV24112601</h2>
+          <h2 className="text-xl font-semibold mb-1">
+            {invoiceId || "INV-XXXXXX"}
+          </h2>
 
           {/* Business Details */}
           <div className="mb-4">
@@ -29,67 +37,67 @@ export default function ReceiptModal({ isOpen, onClose }) {
             </p>
           </div>
 
-          {/* Cashier Info */}
-          <div className="flex justify-between text-sm mb-6">
-            <span>Cashier</span>
-            <span>Nov. 24, 2024, 16:00</span>
+          {/* Admin Info */}
+          <div className="flex justify-between text-sm mb-6 border-b pb-4">
+            <span>{paymentData?.beautyTech || "Admin"}</span>
+            <span>
+              {new Date().toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
           </div>
 
           {/* Services Section */}
-          <div className="border-t border-b border-gray-200 py-4 mb-4">
-            <div className="flex justify-between mb-2">
-              <span className="font-medium">Services</span>
-              <span className="font-medium">Amount</span>
+          <div className="mb-4">
+            <div className="flex justify-between mb-2 text-sm">
+              <span>Services</span>
+              <span>Amount</span>
             </div>
-            <div className="flex justify-between">
-              <span>Brazilian Blowout</span>
-              <span>₱2,800.00</span>
-            </div>
+            {paymentData?.services?.map((service, index) => (
+              <div key={index} className="flex justify-between text-sm mb-2">
+                <span>{service.name}</span>
+                <span>₱{service.price.toLocaleString()}</span>
+              </div>
+            ))}
           </div>
 
           {/* Price Breakdown */}
-          <div className="space-y-2 mb-6">
+          <div className="space-y-2 text-sm border-t pt-4">
             <div className="flex justify-between">
               <span>Total Price:</span>
-              <span>₱2,800.00</span>
+              <span>₱{paymentData?.totalAmount?.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
               <span>Additional fees:</span>
-              <span>₱100.00</span>
+              <span>₱{paymentData?.additionalFee?.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between font-bold">
+            <div className="flex justify-between font-semibold border-t border-b py-2 my-2">
               <span>Total:</span>
-              <span>₱2,900.00</span>
+              <span>₱{paymentData?.totalAmount?.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
               <span>Amount Paid:</span>
-              <span>₱3,000.00</span>
+              <span>₱{paymentData?.amountPaid?.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
               <span>Change:</span>
-              <span>₱100.00</span>
+              <span>₱{paymentData?.change?.toLocaleString()}</span>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-4">
-            <button
-              onClick={() => {
-                /* Add save logic */
-              }}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-            >
-              Save
-            </button>
-            <button
-              onClick={() => {
-                /* Add print logic */
-              }}
-              className="flex-1 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800"
-            >
-              Print
-            </button>
-          </div>
+          {/* Print Button */}
+          <button
+            onClick={() => {
+              /* Add print logic */
+            }}
+            className="w-full mt-6 px-4 py-2 bg-[#1a2642] text-white rounded-md hover:bg-[#243154] transition-colors"
+          >
+            Print
+          </button>
         </div>
       </div>
     </div>
@@ -99,4 +107,18 @@ export default function ReceiptModal({ isOpen, onClose }) {
 ReceiptModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  invoiceId: PropTypes.string,
+  paymentData: PropTypes.shape({
+    services: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string,
+        price: PropTypes.number,
+      })
+    ),
+    beautyTech: PropTypes.string,
+    totalAmount: PropTypes.number,
+    additionalFee: PropTypes.number,
+    amountPaid: PropTypes.number,
+    change: PropTypes.number,
+  }),
 };

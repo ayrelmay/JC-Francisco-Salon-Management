@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import ReceiptModal from "../../pages/Admin/ReceiptModal";
 
 export default function ServiceSummary({
   selectedServices,
@@ -12,6 +13,8 @@ export default function ServiceSummary({
 }) {
   const { id } = useParams();
   const [amountPaid, setAmountPaid] = useState(0);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [invoiceId, setInvoiceId] = useState(null);
 
   const getCategoryColor = (category) => {
     switch (category.toLowerCase()) {
@@ -159,9 +162,15 @@ export default function ServiceSummary({
         throw new Error(`Invoice creation failed: ${responseData.message}`);
       }
 
+      // Store the invoice ID
+      setInvoiceId(responseData.invoiceId);
+
       alert(
         `Payment and invoice details saved successfully. Invoice ID: ${responseData.invoiceId}`
       );
+
+      // After successful payment and saving, show the receipt modal
+      setIsReceiptModalOpen(true);
     } catch (error) {
       console.error("Error saving details:", error);
       alert(`Failed to save details: ${error.message}`);
@@ -307,6 +316,20 @@ export default function ServiceSummary({
           Pay now
         </button>
       </div>
+
+      <ReceiptModal
+        isOpen={isReceiptModalOpen}
+        onClose={() => setIsReceiptModalOpen(false)}
+        invoiceId={invoiceId}
+        paymentData={{
+          services: selectedServices,
+          beautyTech: paymentDetails?.BeautyTech,
+          totalAmount: total,
+          additionalFee: additionalFee,
+          amountPaid: amountPaid,
+          change: change,
+        }}
+      />
     </div>
   );
 }
