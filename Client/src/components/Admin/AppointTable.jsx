@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import ActionDropdown from "../Global/ActionDropdown";
 import ViewAptModal from "../Admin/ViewAptModal.Jsx";
 import EditAppointmentModal from "./EditAppointmentModal";
+import ConfirmationModal from "../Global/ConfirmationModal";
 
 const AppointmentTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,6 +15,8 @@ const AppointmentTable = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [employees, setEmployees] = useState({});
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [appointmentToCancel, setAppointmentToCancel] = useState(null);
 
   const handleViewDetails = (appointment) => {
     setSelectedAppointment(appointment);
@@ -23,6 +26,48 @@ const AppointmentTable = () => {
   const handleEdit = (appointment) => {
     setSelectedAppointment(appointment);
     setIsEditModalOpen(true);
+  };
+
+  const handleCancelClick = (appointment) => {
+    setAppointmentToCancel(appointment);
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!appointmentToCancel) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/appointments/${appointmentToCancel.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: "Cancelled" }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to cancel appointment");
+      }
+
+      // Update the local state to reflect the change
+      setData(
+        data.map((item) =>
+          item.id === appointmentToCancel.id
+            ? { ...item, status: "Cancelled" }
+            : item
+        )
+      );
+
+      // Close the confirmation modal
+      setIsConfirmModalOpen(false);
+      setAppointmentToCancel(null);
+    } catch (error) {
+      console.error("Error cancelling appointment:", error);
+      // Optionally add error handling UI here
+    }
   };
 
   const formatDate = (dateString, timeString) => {
@@ -183,14 +228,10 @@ const AppointmentTable = () => {
           </thead>
           <tbody className="bg-white">
             {paginatedData.map((appointment) => {
-              console.log("Appointment ID:", appointment.id); // Debug log
-              console.log(
-                "Service for this appointment:",
-                services[appointment.id]
-              ); // Debug log
+              console.log("Appointment data:", appointment); // Debug log
               return (
                 <tr
-                  key={appointment.booking_id}
+                  key={appointment.id}
                   className="text-left border-b border-Tableline border-opacity-50 hover:bg-gray-50"
                 >
                   <td className="px-6 py-4 text-[12px] text-gray-600">
@@ -208,13 +249,13 @@ const AppointmentTable = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    {services[appointment.booking_id] ? (
+                    {services[appointment.id] ? (
                       <>
                         <div className="text-[12px] font-medium text-gray-600">
-                          {services[appointment.booking_id].name}
+                          {services[appointment.id].name}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {services[appointment.booking_id].category}
+                          {services[appointment.id].category}
                         </div>
                       </>
                     ) : (
@@ -236,7 +277,7 @@ const AppointmentTable = () => {
                   </td>
                   <td className="px-6 py-4 text-center">
                     <ActionDropdown
-                      onCancel={() => console.log("Cancel clicked")}
+                      onCancel={() => handleCancelClick(appointment)}
                       onEdit={() => handleEdit(appointment)}
                       onViewDetails={() => handleViewDetails(appointment)}
                     />
@@ -291,6 +332,18 @@ const AppointmentTable = () => {
           }}
         />
       )}
+
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => {
+          setIsConfirmModalOpen(false);
+          setAppointmentToCancel(null);
+        }}
+        onConfirm={handleConfirmCancel}
+        message="Are you sure you want to cancel this appointment?"
+        cancelButtonText="Cancel"
+        confirmButtonText="Proceed"
+      />
     </div>
   );
 };

@@ -1,6 +1,13 @@
 import PropTypes from "prop-types";
 
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
+const ConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  message,
+  cancelButtonText = "Cancel",
+  confirmButtonText = "Proceed",
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -14,13 +21,13 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
             onClick={onClose}
             className="px-4 py-2 rounded border border-Tableline border-opacity-30 text-fontPrimary hover:bg-gray-100 transition"
           >
-            Cancel
+            {cancelButtonText}
           </button>
           <button
             onClick={onConfirm}
             className="px-4 py-2 rounded bg-BtnPrimary text-white hover:bg-gray-800 transition"
           >
-            Archive
+            {confirmButtonText}
           </button>
         </div>
       </div>
@@ -33,6 +40,8 @@ ConfirmationModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
   message: PropTypes.string.isRequired,
+  cancelButtonText: PropTypes.string,
+  confirmButtonText: PropTypes.string,
 };
 
 export default ConfirmationModal;

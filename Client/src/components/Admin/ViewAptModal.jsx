@@ -81,7 +81,7 @@ export default function ViewAptModal({
                 </label>
                 <input
                   type="text"
-                  value={appointment.booking_id}
+                  value={appointment.id}
                   readOnly
                   className="w-full px-4 py-2 text-sm border rounded-lg bg-gray-50"
                 />
@@ -159,7 +159,7 @@ export default function ViewAptModal({
                 </label>
                 <input
                   type="text"
-                  value={stylistName || "Unknown"}
+                  value={stylistName}
                   readOnly
                   className="w-full px-4 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50"
                 />
@@ -174,13 +174,13 @@ export default function ViewAptModal({
 
 ViewAptModal.propTypes = {
   appointment: PropTypes.shape({
-    booking_id: PropTypes.string,
+    id: PropTypes.number,
     appointment_date: PropTypes.string,
     appointment_time: PropTypes.string,
     full_name: PropTypes.string,
     email: PropTypes.string,
     mobile_number: PropTypes.string,
-    stylist: PropTypes.string,
+    stylist_id: PropTypes.string,
     status: PropTypes.string,
   }).isRequired,
   service: PropTypes.shape({

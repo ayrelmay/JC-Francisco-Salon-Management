@@ -172,10 +172,14 @@ const Services = () => {
 
       <ConfirmationModal
         isOpen={isConfirmModalOpen}
-        onClose={() => setIsConfirmModalOpen(false)}
+        onClose={() => {
+          setIsConfirmModalOpen(false);
+          setServiceToDelete(null);
+        }}
         onConfirm={handleConfirmDelete}
-        title="Confirm Delete"
-        message={`Are you sure you want to delete ${serviceToDelete?.ServiceName}?`}
+        message={`Are you sure you want to archive this service?`}
+        cancelButtonText="Cancel"
+        confirmButtonText="Archive"
       />
 
       {showSuccessToast && (

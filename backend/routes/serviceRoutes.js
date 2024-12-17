@@ -187,4 +187,59 @@ router.put("/edit/:id", async (req, res) => {
   }
 });
 
+// Fetch specific appointment service by ID
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [service] = await db.query(
+      "SELECT * FROM appointments_services WHERE appointment_id = ?",
+      [id]
+    );
+
+    if (service.length === 0) {
+      return res.status(404).json({ error: "Service not found" });
+    }
+
+    res.status(200).json(service[0]);
+  } catch (err) {
+    console.error("Error fetching specific service:", err);
+    res.status(500).json({
+      error: "Failed to retrieve service",
+      details: err.message,
+    });
+  }
+});
+
+// Update specific appointment service by ID
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { service_id } = req.body;
+
+  try {
+    const [result] = await db.query(
+      "UPDATE appointments_services SET service_id = ? WHERE appointment_id = ?",
+      [service_id, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Service not found" });
+    }
+
+    // Fetch and return the updated service
+    const [updated] = await db.query(
+      "SELECT * FROM appointments_services WHERE appointment_id = ?",
+      [id]
+    );
+
+    res.status(200).json(updated[0]);
+  } catch (err) {
+    console.error("Error updating service:", err);
+    res.status(500).json({
+      error: "Failed to update service",
+      details: err.message,
+    });
+  }
+});
+
 module.exports = router;
