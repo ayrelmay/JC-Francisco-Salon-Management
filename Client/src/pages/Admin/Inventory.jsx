@@ -3,6 +3,7 @@ import DataTable from "../../components/Global/datatable";
 import SearchBar from "../../components/Global/SearchBar";
 import ActionButtons from "../../components/Global/ActionButtons"; // Add your action buttons component
 import { SquarePen, ArchiveRestore } from "lucide-react"; // Add this import
+import ConfirmationModal from "../../components/Global/ConfirmationModal"; // Import ConfirmationModal
 
 const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -10,22 +11,47 @@ const Inventory = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [inventoryItems, setInventoryItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showConfirmation, setShowConfirmation] = useState(false); // State for confirmation modal
+  const [showArchived, setShowArchived] = useState(false); // State to manage showing archived items
+
+  // New function to fetch inventory items with optional archived filter
+  const fetchInventory = async (archived = false) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/inventory?archived=${archived ? 1 : 0}`
+      );
+      const data = await response.json();
+      setInventoryItems(data);
+    } catch (error) {
+      console.error("Error fetching inventory:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchInventory = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/api/inventory");
-        const data = await response.json();
-        setInventoryItems(data);
-      } catch (error) {
-        console.error("Error fetching inventory:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInventory();
+    fetchInventory(); // Fetch inventory items on component mount
   }, []);
+
+  // New function to fetch the status of an item
+  const fetchItemStatus = (item) => {
+    return item.status.toLowerCase().trim(); // Fetching the status
+  };
+
+  const getStatusColor = (item) => {
+    const status = fetchItemStatus(item); // Using the new function to get the status
+    switch (status) {
+      case "In Stock":
+        return "bg-green bg-opacity-25 text-green-800 border-green-500";
+      case "Out of Stock":
+        return "bg-red-500 bg-opacity-25 text-red-800 border-red-500";
+      case "low in stock":
+        return "bg-yellow-500 bg-opacity-25 text-yellow-800 border-yellow-500";
+      default:
+        return "bg-gray-200 text-gray-800 border-gray-300";
+    }
+  };
 
   // Add this render function for action buttons
   const renderActionButtons = (inventoryItems) => (
@@ -60,20 +86,6 @@ const Inventory = () => {
     {
       key: "status",
       header: "Status",
-      render: (item) => (
-        <div className="flex items-center">
-          <span
-            className={`inline-block w-3 h-3 mr-2 rounded-full ${
-              item.status === "Out of Stock"
-                ? "bg-green"
-                : item.status === "Low Stock"
-                ? "bg-yellow"
-                : "bg-red"
-            }`}
-          ></span>
-          {item.status}
-        </div>
-      ),
     },
   ];
 
@@ -83,9 +95,42 @@ const Inventory = () => {
     console.log("Add Item clicked");
   };
 
+  // New function to handle showing archived items
+  const handleShowArchived = () => {
+    setShowArchived(!showArchived); // Toggle the showArchived state
+    fetchInventory(!showArchived); // Fetch inventory items based on the new state
+  };
+
+  // Update handleDelete function to show confirmation modal
   const handleDelete = (item) => {
-    // Implement delete logic
-    alert(`Item ${item.name} deleted!`);
+    setSelectedItem(item); // Set the selected item for confirmation
+    setShowConfirmation(true); // Show the confirmation modal
+  };
+
+  // Function to confirm archiving the item
+  const confirmArchive = async () => {
+    if (selectedItem) {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/inventory/archive/${selectedItem.id}`,
+          {
+            method: "PUT",
+          }
+        );
+        if (response.ok) {
+          alert(`Item ${selectedItem.name} archived!`);
+          await fetchInventory(); // Refresh the inventory items after archiving
+        } else {
+          alert("Failed to archive item.");
+        }
+      } catch (error) {
+        console.error("Error archiving item:", error);
+        alert("Error archiving item.");
+      } finally {
+        setShowConfirmation(false); // Close the confirmation modal
+        setSelectedItem(null); // Clear the selected item
+      }
+    }
   };
 
   return (
@@ -93,7 +138,7 @@ const Inventory = () => {
       {/* Search and Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
         <SearchBar value={searchTerm} onChange={setSearchTerm} />
-        <ActionButtons onAdd={handleAddItem} onArchive={() => {}} />
+        <ActionButtons onAdd={handleAddItem} onArchive={handleShowArchived} />
       </div>
 
       {loading ? (
@@ -101,10 +146,32 @@ const Inventory = () => {
       ) : (
         <DataTable
           columns={columns}
-          data={inventoryItems}
+          data={inventoryItems.map((item) => ({
+            ...item,
+            statusColor: getStatusColor(item), // Add status color to each item
+          }))}
           actionButtons={renderActionButtons}
+          renderRow={(item) => (
+            <tr key={item.id} className={item.statusColor}>
+              <td>{item.id}</td>
+              <td>{item.name}</td>
+              <td>{item.category}</td>
+              <td>{item.quantity}</td>
+              <td>{item.status}</td>
+            </tr>
+          )}
         />
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
+        onConfirm={confirmArchive}
+        message="Are you sure you want to archive this item?"
+        cancelButtonText="Cancel"
+        confirmButtonText="Proceed"
+      />
 
       {/* Modal Placeholder */}
       {showModal && (
