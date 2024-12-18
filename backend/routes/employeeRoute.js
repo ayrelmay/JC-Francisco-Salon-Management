@@ -7,7 +7,7 @@ router.get("/", async (req, res) => {
   try {
     const [employees] = await db.query(`
       SELECT 
-        ID as id,
+        ID,
         name,
         role,
         email,

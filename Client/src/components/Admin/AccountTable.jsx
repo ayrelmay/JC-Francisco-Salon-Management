@@ -64,7 +64,7 @@ const AccountTable = ({ data }) => {
                 className="text-left border-b border-Tableline border-opacity-50 transition-colors hover:bg-gray-50"
               >
                 <td className="px-6 py-4 text-[12px] text-gray-600">
-                  {employee.id}
+                  {employee.ID}
                 </td>
                 <td className="px-6 py-4 text-[12px] text-gray-600">
                   {employee.name}
