@@ -12,6 +12,7 @@ const aptTimeRoute = require("./routes/aptTimeRoute");
 const employeeRoutes = require("./routes/employeeRoute");
 const invoiceDetailsRoutes = require("./routes/invoiceDetailsRoutes");
 const invoiceRoutes = require("./routes/invoiceRoutes");
+const inventoryRoutes = require("./routes/inventoryRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +31,7 @@ app.use("/api/appointment_time", aptTimeRoute);
 app.use("/api/employee", employeeRoutes);
 app.use("/api/invoicedetails", invoiceDetailsRoutes);
 app.use("/api/invoice", invoiceRoutes);
+app.use("/api/inventory", inventoryRoutes);
 
 // Start the server
 app.listen(PORT, () => {
