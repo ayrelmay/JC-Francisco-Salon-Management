@@ -1,66 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DataTable from "../../components/Global/datatable";
 import SearchBar from "../../components/Global/SearchBar";
 import ActionButtons from "../../components/Global/ActionButtons"; // Add your action buttons component
+import { SquarePen, ArchiveRestore } from "lucide-react"; // Add this import
 
 const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [inventoryItems, setInventoryItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const inventoryItems = [
-    {
-      id: "ITM-A0001",
-      name: "Bremod Hair Color",
-      category: "Hair Color",
-      quantity: 20,
-      status: "Out of Stock",
-    },
-    {
-      id: "ITM-A0002",
-      name: "Rebon Treatment",
-      category: "Hair Color",
-      quantity: 20,
-      status: "Low Stock",
-    },
-    {
-      id: "ITM-A0003",
-      name: "Brazilian Treatment",
-      category: "Hair Color",
-      quantity: 20,
-      status: "In Stock",
-    },
-    {
-      id: "ITM-A0004",
-      name: "Shampoo",
-      category: "Hair Color",
-      quantity: 20,
-      status: "Out of Stock",
-    },
-    {
-      id: "ITM-A0005",
-      name: "Conditioner",
-      category: "Hair Color",
-      quantity: 20,
-      status: "Out of Stock",
-    },
-    {
-      id: "ITM-A0006",
-      name: "Nail Polish",
-      category: "Hair Color",
-      quantity: 20,
-      status: "Out of Stock",
-    },
-    {
-      id: "ITM-A0007",
-      name: "Oil",
-      category: "Hair Color",
-      quantity: 20,
-      status: "Out of Stock",
-    },
-  ];
+  useEffect(() => {
+    const fetchInventory = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/inventory");
+        const data = await response.json();
+        setInventoryItems(data);
+      } catch (error) {
+        console.error("Error fetching inventory:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleRowClick = (item) => {
+    fetchInventory();
+  }, []);
+
+  // Add this render function for action buttons
+  const renderActionButtons = (inventoryItems) => (
+    <>
+      <button
+        onClick={() => handleEdit(inventoryItems)}
+        className="flex items-center justify-center w-8 h-8 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-Tableline border-opacity-30"
+      >
+        <SquarePen className="h-4 w-4 text-FontPrimary" />
+      </button>
+      <button
+        onClick={() => handleDelete(inventoryItems)}
+        className="flex items-center justify-center w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100 border border-Tableline border-opacity-30"
+      >
+        <ArchiveRestore className="h-4 w-4" />
+      </button>
+    </>
+  );
+
+  // Add handleEdit function
+  const handleEdit = (item) => {
     setSelectedItem(item);
     setShowModal(true);
   };
@@ -110,18 +96,15 @@ const Inventory = () => {
         <ActionButtons onAdd={handleAddItem} onArchive={() => {}} />
       </div>
 
-      {/* DataTable Component */}
-      <DataTable
-        title="Inventory"
-        columns={columns}
-        data={inventoryItems.filter(
-          (item) =>
-            item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.id.toLowerCase().includes(searchTerm.toLowerCase())
-        )}
-        onDelete={handleDelete}
-        onRowClick={handleRowClick} // Pass the row click handler
-      />
+      {loading ? (
+        <div className="text-center py-4">Loading...</div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={inventoryItems}
+          actionButtons={renderActionButtons}
+        />
+      )}
 
       {/* Modal Placeholder */}
       {showModal && (
