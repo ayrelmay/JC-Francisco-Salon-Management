@@ -1,7 +1,15 @@
 import { BellIcon } from "lucide-react";
 import PropTypes from "prop-types";
+import CalendarModal from "../components/Global/CalendarModal";
+import { useState } from "react";
 
 const Header = ({ title }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
   // Get current date in the format "Day, DD Month"
   const getCurrentDate = () => {
     return new Intl.DateTimeFormat("en-US", {
@@ -18,7 +26,15 @@ const Header = ({ title }) => {
           {title}
         </h1>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">{getCurrentDate()}</span>
+          <div className="relative">
+            <button
+              className="text-sm text-gray-500 px-3 py-1.5 rounded hover:bg-gray-100"
+              onClick={toggleModal}
+            >
+              {getCurrentDate()} ▼
+            </button>
+            <CalendarModal isOpen={isModalOpen} onClose={toggleModal} />
+          </div>
           <button className="rounded-full p-2 text-gray-600 hover:bg-gray-100 transition-colors">
             <BellIcon className="h-5 w-5" />
           </button>
