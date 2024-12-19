@@ -11,10 +11,10 @@ import {
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/cashier/dashboard" },
-  { name: "Payment", icon: CreditCard, path: "/admin/payment" },
-  { name: "Services", icon: Briefcase, path: "/admin/services" },
-  { name: "Appointment", icon: Calendar, path: "/admin/appointment" },
-  { name: "Inventory", icon: Package, path: "/admin/inventory" },
+  { name: "Payment", icon: CreditCard, path: "/cashier/payment" },
+  { name: "Services", icon: Briefcase, path: "/cashier/services" },
+  { name: "Appointment", icon: Calendar, path: "/cashier/appointment" },
+  { name: "Inventory", icon: Package, path: "/cashier/inventory" },
   { name: "InvoiceHistory", icon: FileText, path: "/cashier/invoicehistory" },
 ];
 
@@ -45,7 +45,7 @@ export default function CashierSidebar() {
                   className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors
                     ${
                       isActive
-                        ? "bg-blue-600 text-white"
+                        ? "bg-BtnFocus text-FontPrimary"
                         : "text-FontPrimary hover:bg-gray-100"
                     }`}
                 >

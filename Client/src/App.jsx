@@ -10,18 +10,19 @@ import Appointment from "./pages/Admin/Appointment";
 import Inventory from "./pages/Admin/Inventory";
 import InvoiceHistory from "./pages/Admin/InvoiceHistory";
 import Accounts from "./pages/Admin/Accounts";
-import LandingPage from "./pages/Client/LandingPage";
 import Login from "./pages/Client/Login";
 import CahsierAppLayout from "./ui/CahsierApplayout";
 import TechAppLayout from "./ui/TechApplayout";
 import { AuthProvider } from "./context/AuthContext";
+import ClientAppLayout from "./ClientSide/clientApplayout";
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          {/* Client Routes */}
+          <Route path="/*" element={<ClientAppLayout />} />
           <Route path="/login" element={<Login />} />
 
           {/* Admin Routes */}
