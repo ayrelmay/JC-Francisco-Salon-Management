@@ -1,5 +1,6 @@
 import "./App.css";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Applayout from "./ui/applayout";
 import Dashbaord from "./pages/Admin/Dashboard";
 import Payment from "./pages/Admin/Payment";
@@ -9,26 +10,72 @@ import Appointment from "./pages/Admin/Appointment";
 import Inventory from "./pages/Admin/Inventory";
 import InvoiceHistory from "./pages/Admin/InvoiceHistory";
 import Accounts from "./pages/Admin/Accounts";
+import LandingPage from "./pages/Client/LandingPage";
+import Login from "./pages/Client/Login";
+import CahsierAppLayout from "./ui/CahsierApplayout";
+import TechAppLayout from "./ui/TechApplayout";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Applayout />}>
-          <Route index element={<Navigate replace to="dashboard" />} />
-          <Route path="dashboard" element={<Dashbaord />} />
-          <Route path="payment">
-            <Route index element={<Payment />} />
-            <Route path="edit/:id" element={<PaymentEdit />} />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+
+          <Route
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <Applayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="dashboard" element={<Dashbaord />} />
+            <Route path="payment" element={<Payment />} />
+            <Route path="payment/edit/:id" element={<PaymentEdit />} />
+            <Route path="services" element={<Services />} />
+            <Route path="appointment" element={<Appointment />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="invoicehistory" element={<InvoiceHistory />} />
+            <Route path="accounts" element={<Accounts />} />
           </Route>
-          <Route path="services" element={<Services />} />
-          <Route path="appointment" element={<Appointment />} />
-          <Route path="inventory" element={<Inventory />} />
-          <Route path="invoicehistory" element={<InvoiceHistory />} />
-          <Route path="accounts" element={<Accounts />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+
+          <Route
+            element={
+              <ProtectedRoute allowedRoles={["cashier"]}>
+                <CahsierAppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="dashboard" element={<Dashbaord />} />
+            <Route path="payment" element={<Payment />} />
+            <Route path="payment/edit/:id" element={<PaymentEdit />} />
+            <Route path="services" element={<Services />} />
+            <Route path="appointment" element={<Appointment />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="invoicehistory" element={<InvoiceHistory />} />
+            <Route path="accounts" element={<Accounts />} />
+          </Route>
+
+          <Route
+            element={
+              <ProtectedRoute allowedRoles={["technician"]}>
+                <TechAppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="services" element={<Services />} />
+            <Route path="appointment" element={<Appointment />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="invoicehistory" element={<InvoiceHistory />} />
+            <Route path="accounts" element={<Accounts />} />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

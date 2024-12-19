@@ -1,4 +1,45 @@
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { loginUser, getRedirectPath } from "../../utils/auth";
+
 const Login = () => {
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: e.target.email.value,
+          password: e.target.password.value,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Store user data
+        loginUser(data.user);
+        setUser(data.user);
+
+        // Redirect based on role
+        const redirectPath = getRedirectPath(data.user.role);
+        navigate(redirectPath);
+      } else {
+        alert(data.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("An error occurred during login");
+    }
+  };
+
   return (
     <section className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
       <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
@@ -18,7 +59,7 @@ const Login = () => {
               </p>
             </div>
           </div>
-          <form className="space-y-4 md:space-y-6" action="#">
+          <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="email"

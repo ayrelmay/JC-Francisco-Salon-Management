@@ -13,5 +13,6 @@ const pool = mysql.createPool({
 
 // Promise-based queries
 const db = pool.promise();
+require("dotenv").config();
 
 module.exports = db; // Export the pool for use in routes

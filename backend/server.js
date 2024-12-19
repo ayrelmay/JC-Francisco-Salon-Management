@@ -13,6 +13,8 @@ const employeeRoutes = require("./routes/employeeRoute");
 const invoiceDetailsRoutes = require("./routes/invoiceDetailsRoutes");
 const invoiceRoutes = require("./routes/invoiceRoutes");
 const inventoryRoutes = require("./routes/inventoryRoutes");
+const revenueRoutes = require("./routes/revenueRoute");
+const authRoutes = require("./routes/authRoutes"); // Add this line
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,7 +34,8 @@ app.use("/api/employee", employeeRoutes);
 app.use("/api/invoicedetails", invoiceDetailsRoutes);
 app.use("/api/invoice", invoiceRoutes);
 app.use("/api/inventory", inventoryRoutes);
-
+app.use("/api/revenue", revenueRoutes);
+app.use("/api/auth", authRoutes);
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

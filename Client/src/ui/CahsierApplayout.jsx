@@ -2,7 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import CashierSidebar from "./CashierSidebar";
 import Header from "./Header";
 
-export default function CashierAppLayout() {
+export default function CahsierAppLayout() {
   const location = useLocation();
 
   // Function to generate title based on current path

@@ -1,6 +1,6 @@
 import { Facebook, Twitter, Instagram } from "lucide-react";
-import img1 from "../assets/2.jpg";
-import img2 from "../assets/6.jpg";
+// import img1 from "../assets/2.jpg";
+// import img2 from "../assets/6.jpg";
 
 function LandingPage() {
   return (
@@ -51,7 +51,6 @@ function LandingPage() {
             <div className="absolute top-0 right-0 w-72 h-72 bg-pink-100 rounded-full" />
             {/* First Image */}
             <img
-              src={img1}
               alt="Beauty treatment demonstration"
               width={300}
               height={300}
@@ -60,7 +59,6 @@ function LandingPage() {
 
             <div className="absolute top-24 right-0 w-72 h-72 bg-pink-100 rounded-full">
               <img
-                src={img2}
                 alt="Beauty result showcase"
                 className="object-cover relative z-10 rounded-full"
                 width={500}

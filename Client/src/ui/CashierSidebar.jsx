@@ -10,12 +10,12 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { name: "Dashboard", icon: LayoutDashboard, path: "/" },
+  { name: "Dashboard", icon: LayoutDashboard, path: "/DashboardCashier" },
   { name: "Payment", icon: CreditCard, path: "/payment" },
   { name: "Services", icon: Briefcase, path: "/services" },
   { name: "Appointment", icon: Calendar, path: "/appointment" },
   { name: "Inventory", icon: Package, path: "/inventory" },
-  { name: "InvoiceHistory", icon: FileText, path: "/InvoiceHistory" },
+  { name: "InvoiceHistory", icon: FileText, path: "/InvoiceCashier" },
 ];
 
 export default function CashierSidebar() {
