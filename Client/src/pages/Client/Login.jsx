@@ -1,9 +1,7 @@
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { loginUser, getRedirectPath } from "../../utils/auth";
 
 const Login = () => {
-  const navigate = useNavigate();
   const { setUser } = useAuth();
 
   const handleSubmit = async (e) => {
@@ -22,15 +20,29 @@ const Login = () => {
       });
 
       const data = await response.json();
+      console.log("Login response:", data);
 
       if (data.success) {
-        // Store user data
-        loginUser(data.user);
-        setUser(data.user);
+        try {
+          // Store the token and user data
+          loginUser({
+            token: data.token,
+            user: data.user,
+          });
 
-        // Redirect based on role
-        const redirectPath = getRedirectPath(data.user.role);
-        navigate(redirectPath);
+          // Set the user in context
+          setUser(data.user);
+
+          // Get the correct redirect path based on role
+          const redirectPath = getRedirectPath(data.user.role);
+          console.log("Redirecting to:", redirectPath); // Debug log
+
+          // Force a hard navigation to the new route
+          window.location.href = redirectPath;
+        } catch (error) {
+          console.error("Error during login process:", error);
+          alert(error.message);
+        }
       } else {
         alert(data.message || "Login failed");
       }
@@ -41,8 +53,8 @@ const Login = () => {
   };
 
   return (
-    <section className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-      <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+    <section className="flex items-center justify-center min-h-screen px-6 py-8 mx-auto">
+      <div className="w-full max-w-md bg-white rounded-lg shadow dark:border md:mt-0 xl:p-0 dark:bg-gray-800 dark:border-gray-700">
         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
           <div className="flex items-start">
             <img
@@ -93,55 +105,13 @@ const Login = () => {
               />
             </div>
             <div className="flex items-center justify-between">
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="remember"
-                    aria-describedby="remember"
-                    type="checkbox"
-                    className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800 text-PrimFont"
-                    required=""
-                  />
-                </div>
-
-                <div className="ml-3 text-sm">
-                  <label
-                    htmlFor="remember"
-                    className="text-gray-500 dark:text-gray-300"
-                  >
-                    Remember me
-                  </label>
-                </div>
-              </div>
-              <a
-                href="#"
-                className="text-sm font-medium text-primary-600 hover:underline text-PrimFont"
-              >
-                Forgot password?
-              </a>
+              <div className="flex items-start"></div>
             </div>
             <button
               type="submit"
-              className="w-full text-bgcSec bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 bg-PrimBtn"
+              className="w-full text-bgcSec bg-FontPrimary hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 bg-PrimBtn"
             >
               Sign in
-            </button>
-            <div className="flex items-center my-4">
-              <div className="flex-grow border-t opacity-60  border-PrimFont-100"></div>
-              <span className="mx-4 text-PrimFont-100 font-extralight">or</span>
-              <div className="flex-grow border-t opacity-60 border-PrimFont-100"></div>
-            </div>
-
-            <button
-              type="submit"
-              className="border w-full text-PrimFont bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 bg-bgcSec flex items-center justify-center gap-2"
-            >
-              <img
-                src="/google log.png"
-                alt="Google logo"
-                className="w-7 h-7"
-              />
-              Sign in with Google
             </button>
           </form>
         </div>

@@ -2,8 +2,8 @@ import { Link, useLocation } from "react-router-dom";
 import { Briefcase, Calendar, LogOut } from "lucide-react";
 
 const navItems = [
-  { name: "Appointment", icon: Calendar, path: "/" },
-  { name: "Services", icon: Briefcase, path: "/services" },
+  { name: "Appointment", icon: Calendar, path: "/technician/appointment" },
+  { name: "Services", icon: Briefcase, path: "/technician/services" },
 ];
 
 export default function TechSidebar() {
@@ -33,7 +33,7 @@ export default function TechSidebar() {
                   className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors
                     ${
                       isActive
-                        ? "bg-blue-600 text-white"
+                        ? "bg-BtnFocus text-FontPrimary"
                         : "text-FontPrimary hover:bg-gray-100"
                     }`}
                 >

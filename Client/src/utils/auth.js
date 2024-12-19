@@ -20,16 +20,34 @@ export const getUser = () => {
 
 // Login user
 export const loginUser = (userData) => {
+  if (!userData || !userData.user) {
+    throw new Error("Invalid user data");
+  }
+
   if (userData.token) {
     localStorage.setItem("token", userData.token);
   }
+
+  // Store the user object
   localStorage.setItem("user", JSON.stringify(userData.user));
+
+  // No need to block any roles since they have their own protected routes
+  const role = userData.user.role;
+  if (!["admin", "cashier", "technician"].includes(role)) {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    throw new Error("Invalid role.");
+  }
 };
 
 // Logout user
 export const logoutUser = () => {
   localStorage.removeItem("user");
   localStorage.removeItem("token");
+
+  // Expire the token by setting a flag or timestamp
+  localStorage.setItem("tokenExpired", new Date().toISOString());
+
   window.location.href = "/login";
 };
 
@@ -37,11 +55,11 @@ export const logoutUser = () => {
 export const getRedirectPath = (role) => {
   switch (role) {
     case "admin":
-      return "/dashboard";
+      return "/admin/dashboard";
     case "cashier":
-      return "/dashboard";
+      return "/cashier/dashboard";
     case "technician":
-      return "/services";
+      return "/technician/services";
     default:
       return "/login";
   }

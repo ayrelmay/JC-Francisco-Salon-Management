@@ -24,7 +24,9 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
 
+          {/* Admin Routes */}
           <Route
+            path="/admin/*"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <Applayout />
@@ -41,7 +43,9 @@ function App() {
             <Route path="accounts" element={<Accounts />} />
           </Route>
 
+          {/* Cashier Routes */}
           <Route
+            path="/cashier/*"
             element={
               <ProtectedRoute allowedRoles={["cashier"]}>
                 <CahsierAppLayout />
@@ -58,7 +62,9 @@ function App() {
             <Route path="accounts" element={<Accounts />} />
           </Route>
 
+          {/* Technician Routes */}
           <Route
+            path="/technician/*"
             element={
               <ProtectedRoute allowedRoles={["technician"]}>
                 <TechAppLayout />
