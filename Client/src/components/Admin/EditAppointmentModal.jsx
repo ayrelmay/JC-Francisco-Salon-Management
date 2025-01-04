@@ -7,30 +7,49 @@ export default function EditAppointmentModal({
   onServiceEdited,
   initialData,
 }) {
-  console.log("Initial Data received:", initialData);
-
   const displayId = initialData.id || initialData.booking_id;
-
-  const [formData, setFormData] = useState({
-    id: displayId,
-    appointment_date: initialData?.appointment_date || "",
-    full_name: initialData?.full_name || "",
-    email: initialData?.email || "",
-    mobile_number: initialData?.mobile_number || "",
-    service: initialData?.service || "",
-    appointment_time: initialData?.appointment_time || "",
-    stylist_id: initialData?.stylist_id || "",
-    status: initialData?.status || "Active",
-  });
-
   const [loading, setLoading] = useState(false);
   const [appointmentTimes, setAppointmentTimes] = useState([]);
   const [services, setServices] = useState([]);
   const [stylists, setStylists] = useState([]);
+  const [appointmentDetails, setAppointmentDetails] = useState(null);
+
+  const [formData, setFormData] = useState({
+    id: displayId,
+    appointment_date: "",
+    full_name: "",
+    email: "",
+    mobile_number: "",
+    service: "",
+    appointment_time: "",
+    stylist_id: "",
+    status: "Active",
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch appointment details using the new endpoint
+        const appointmentResponse = await fetch(
+          `http://localhost:3000/api/appointments/details/${displayId}`
+        );
+        const appointmentData = await appointmentResponse.json();
+        setAppointmentDetails(appointmentData);
+
+        // Set form data with the fetched appointment details
+        setFormData({
+          id: displayId,
+          appointment_date: appointmentData.appointment_date || "",
+          full_name: appointmentData.full_name || "",
+          email: appointmentData.email || "",
+          mobile_number: appointmentData.mobile_number || "",
+          service: appointmentData.services?.[0]?.service_name || "",
+          appointment_time: appointmentData.appointment_time || "",
+          stylist_id: appointmentData.stylist_id || "",
+          status: appointmentData.status || "Active",
+        });
+
+        // Fetch other necessary data
         const [timesRes, servicesRes, stylistsRes] = await Promise.all([
           fetch("http://localhost:3000/api/appointment_time"),
           fetch("http://localhost:3000/api/service"),
@@ -50,7 +69,7 @@ export default function EditAppointmentModal({
     };
 
     fetchData();
-  }, []);
+  }, [displayId]);
 
   const formatTime = (timeString) => {
     if (!timeString) return "";
@@ -109,13 +128,21 @@ export default function EditAppointmentModal({
   };
 
   const hasFormChanged = () => {
+    if (!appointmentDetails) return false;
+
     const editableFields = [
       "appointment_date",
       "service",
       "appointment_time",
       "stylist_id",
     ];
-    return editableFields.some((key) => formData[key] !== initialData[key]);
+
+    return editableFields.some((key) => {
+      if (key === "service") {
+        return formData[key] !== appointmentDetails.services?.[0]?.service_id;
+      }
+      return formData[key] !== appointmentDetails[key];
+    });
   };
 
   const handleChange = (e) => {
@@ -131,6 +158,15 @@ export default function EditAppointmentModal({
     setLoading(true);
 
     try {
+      // First, find the service ID that matches the selected service name
+      const selectedService = services.find(
+        (s) => s.ServiceName === formData.service
+      );
+      if (!selectedService) {
+        throw new Error("Selected service not found");
+      }
+
+      // Update appointment details
       const appointmentResponse = await fetch(
         `http://localhost:3000/api/appointments/${displayId}`,
         {
@@ -144,13 +180,14 @@ export default function EditAppointmentModal({
         }
       );
 
+      // Update service using the service ID
       const serviceResponse = await fetch(
         `http://localhost:3000/api/apptservices/${displayId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            service_id: formData.service,
+            service_id: selectedService.Id, // Use the ID from the found service
           }),
         }
       );
@@ -159,8 +196,13 @@ export default function EditAppointmentModal({
         throw new Error("Failed to update appointment");
       }
 
-      const updatedAppointment = await appointmentResponse.json();
-      onServiceEdited(updatedAppointment);
+      // Fetch updated appointment details
+      const updatedDetailsResponse = await fetch(
+        `http://localhost:3000/api/appointments/details/${displayId}`
+      );
+      const updatedDetails = await updatedDetailsResponse.json();
+
+      onServiceEdited(updatedDetails);
       onClose();
     } catch (error) {
       console.error("Error updating appointment:", error);
@@ -285,13 +327,14 @@ export default function EditAppointmentModal({
               </label>
               <select
                 name="service"
-                value={initialData.service}
+                value={formData.service}
                 onChange={handleChange}
                 className="w-full px-4 py-2 text-sm border border-gray-200 rounded-lg"
                 required
               >
+                <option value="">Select service</option>
                 {services.map((service) => (
-                  <option key={service.ServiceName} value={service.ServiceName}>
+                  <option key={service.Id} value={service.ServiceName}>
                     {service.ServiceName}
                   </option>
                 ))}
@@ -310,7 +353,6 @@ export default function EditAppointmentModal({
                   }
                   onChange={handleChange}
                   className="w-full px-4 py-2 text-sm border border-gray-200 rounded-lg"
-                  required
                 >
                   <option value="">
                     {formatTime(initialData.appointment_time) || "Select time"}
@@ -328,7 +370,7 @@ export default function EditAppointmentModal({
                   Stylist <span className="text-red-500">*</span>
                 </label>
                 <select
-                  name="stylist"
+                  name="stylist_id"
                   value={formData.stylist_id}
                   onChange={handleChange}
                   className="w-full px-4 py-2 text-sm border border-gray-200 rounded-lg"
@@ -336,11 +378,7 @@ export default function EditAppointmentModal({
                 >
                   <option value="">Select stylist</option>
                   {stylists.map((stylist) => (
-                    <option
-                      key={stylist.ID}
-                      value={stylist.ID}
-                      selected={stylist.ID === initialData.stylist_id}
-                    >
+                    <option key={stylist.ID} value={stylist.ID}>
                       {stylist.name}
                     </option>
                   ))}
@@ -379,13 +417,7 @@ EditAppointmentModal.propTypes = {
   initialData: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     booking_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    appointment_date: PropTypes.string,
-    full_name: PropTypes.string,
-    email: PropTypes.string,
-    mobile_number: PropTypes.string,
-    service: PropTypes.string,
     appointment_time: PropTypes.string,
-    stylist_id: PropTypes.string,
-    status: PropTypes.string,
+    service: PropTypes.string,
   }).isRequired,
 };

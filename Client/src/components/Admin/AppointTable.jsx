@@ -3,10 +3,10 @@ import ActionDropdown from "../Global/ActionDropdown";
 import ViewAptModal from "../Admin/ViewAptModal.Jsx";
 import EditAppointmentModal from "./EditAppointmentModal";
 import ConfirmationModal from "../Global/ConfirmationModal";
+import PropTypes from "prop-types";
 
-const AppointmentTable = () => {
+const AppointmentTable = ({ data, onRefresh }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [data, setData] = useState([]);
   const [services, setServices] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -53,13 +53,7 @@ const AppointmentTable = () => {
       }
 
       // Update the local state to reflect the change
-      setData(
-        data.map((item) =>
-          item.id === appointmentToCancel.id
-            ? { ...item, status: "Cancelled" }
-            : item
-        )
-      );
+      onRefresh();
 
       // Close the confirmation modal
       setIsConfirmModalOpen(false);
@@ -132,24 +126,22 @@ const AppointmentTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [appointmentsResponse, servicesResponse, employeesResponse] =
-          await Promise.all([
-            fetch("http://localhost:3000/api/appointments"),
-            fetch("http://localhost:3000/api/apptservices"),
-            fetch("http://localhost:3000/api/employee"),
-          ]);
+        // Only fetch services and employees data since appointments come from props
+        const [servicesResponse, employeesResponse] = await Promise.all([
+          fetch("http://localhost:3000/api/apptservices"),
+          fetch("http://localhost:3000/api/employee"),
+        ]);
 
-        const appointmentsData = await appointmentsResponse.json();
         const servicesData = await servicesResponse.json();
         const employeesData = await employeesResponse.json();
 
-        // Create a map of employee_id to employee name
+        // Create employee map
         const employeeMap = {};
         employeesData.forEach((employee) => {
           employeeMap[employee.ID] = employee.name;
         });
 
-        // Create services map (existing code)
+        // Create services map
         const serviceMap = {};
         servicesData.forEach((service) => {
           serviceMap[service.appointment_id] = {
@@ -160,7 +152,6 @@ const AppointmentTable = () => {
 
         setEmployees(employeeMap);
         setServices(serviceMap);
-        setData(appointmentsData);
         setLoading(false);
       } catch (err) {
         console.error("Fetch error:", err);
@@ -170,7 +161,16 @@ const AppointmentTable = () => {
     };
 
     fetchData();
-  }, []);
+
+    // Set up auto-refresh interval
+    const refreshInterval = setInterval(() => {
+      onRefresh(); // Refresh appointments data
+      fetchData(); // Refresh services and employees data
+    }, 5000); // Refresh every 5 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(refreshInterval);
+  }, [onRefresh]); // Add onRefresh to dependencies
 
   const getStatusColor = (status) => {
     console.log("Status received:", status); // Keep for debugging
@@ -320,15 +320,15 @@ const AppointmentTable = () => {
       {isEditModalOpen && selectedAppointment && (
         <EditAppointmentModal
           initialData={selectedAppointment}
-          service={services[selectedAppointment.booking_id]}
-          onClose={() => setIsEditModalOpen(false)}
-          onServiceEdited={(updatedData) => {
-            setData(
-              data.map((item) =>
-                item.booking_id === updatedData.booking_id ? updatedData : item
-              )
-            );
+          onClose={() => {
             setIsEditModalOpen(false);
+            setSelectedAppointment(null);
+            onRefresh(); // Refresh when modal closes
+          }}
+          onServiceEdited={() => {
+            setIsEditModalOpen(false);
+            setSelectedAppointment(null);
+            onRefresh(); // Refresh after successful edit
           }}
         />
       )}
@@ -346,6 +346,11 @@ const AppointmentTable = () => {
       />
     </div>
   );
+};
+
+AppointmentTable.propTypes = {
+  data: PropTypes.array.isRequired,
+  onRefresh: PropTypes.func.isRequired,
 };
 
 export default AppointmentTable;

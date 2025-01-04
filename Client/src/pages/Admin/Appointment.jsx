@@ -13,24 +13,25 @@ const Appointments = () => {
   // Tabs for filtering
   const tabs = ["Today", "Upcoming", "Complete", "Canceled"];
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/api/appointments");
-        if (!response.ok) {
-          throw new Error("Failed to fetch appointments");
-        }
-        const data = await response.json();
-        console.log("Fetched appointments:", data);
-        setAppointments(data);
-        setLoading(false);
-      } catch (err) {
-        console.error("Fetch error:", err);
-        setError(err.message);
-        setLoading(false);
+  // Fetch appointments function
+  const fetchAppointments = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/appointments");
+      if (!response.ok) {
+        throw new Error("Failed to fetch appointments");
       }
-    };
+      const data = await response.json();
+      console.log("Fetched appointments:", data);
+      setAppointments(data);
+      setLoading(false);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchAppointments();
   }, []);
 
@@ -108,7 +109,10 @@ const Appointments = () => {
       </div>
 
       {/* Appointment Table - passing raw appointments data */}
-      <AppointmentTable data={appointments} />
+      <AppointmentTable
+        data={appointments}
+        onRefresh={fetchAppointments} // Pass the refresh function
+      />
     </div>
   );
 };
