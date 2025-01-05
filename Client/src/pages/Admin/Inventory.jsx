@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import DataTable from "../../components/Global/datatable";
 import SearchBar from "../../components/Global/SearchBar";
-import ActionButtons from "../../components/Global/ActionButtons"; // Add your action buttons component
 import { SquarePen, ArchiveRestore } from "lucide-react"; // Add this import
 import ConfirmationModal from "../../components/Global/ConfirmationModal"; // Import ConfirmationModal
+import SecondaryBtn from "../../components/Global/SecondaryBtn";
+import PrimaryBtn from "../../components/Global/PrimaryBtn";
+import AddInventoryModal from "../../components/Admin/AddInventoryModal"; // Import AddInventoryModal
 
 const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -12,7 +14,8 @@ const Inventory = () => {
   const [inventoryItems, setInventoryItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false); // State for confirmation modal
-  const [showArchived, setShowArchived] = useState(false); // State to manage showing archived items
+  const [showAddItemModal, setShowAddItemModal] = useState(false); // New state for AddInventoryModal
+  // const [showArchived, setShowArchived] = useState(false); // State to manage showing archived items
 
   // New function to fetch inventory items with optional archived filter
   const fetchInventory = async (archived = false) => {
@@ -89,17 +92,16 @@ const Inventory = () => {
     },
   ];
 
-  // Handle the action buttons
+  // New function to handle showing the Add Inventory Modal
   const handleAddItem = () => {
-    // Implement add item logic
-    console.log("Add Item clicked");
+    setShowAddItemModal(true); // Show the AddInventoryModal
   };
 
   // New function to handle showing archived items
-  const handleShowArchived = () => {
-    setShowArchived(!showArchived); // Toggle the showArchived state
-    fetchInventory(!showArchived); // Fetch inventory items based on the new state
-  };
+  // const handleShowArchived = () => {
+  //   setShowArchived(!showArchived); // Toggle the showArchived state
+  //   fetchInventory(!showArchived); // Fetch inventory items based on the new state
+  // };
 
   // Update handleDelete function to show confirmation modal
   const handleDelete = (item) => {
@@ -138,8 +140,16 @@ const Inventory = () => {
       {/* Search and Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
         <SearchBar value={searchTerm} onChange={setSearchTerm} />
-        <ActionButtons onAdd={handleAddItem} onArchive={handleShowArchived} />
+        <div className="flex items-center gap-2">
+          <PrimaryBtn onClick={handleAddItem}>Add Item</PrimaryBtn>
+          <SecondaryBtn>Archive</SecondaryBtn>
+        </div>
       </div>
+
+      {/* Render AddInventoryModal */}
+      {showAddItemModal && (
+        <AddInventoryModal onClose={() => setShowAddItemModal(false)} />
+      )}
 
       {loading ? (
         <div className="text-center py-4">Loading...</div>

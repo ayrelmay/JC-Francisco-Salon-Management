@@ -38,4 +38,54 @@ router.put("/archive/:id", async (req, res) => {
   }
 });
 
+// Add this new route to get the next available ID
+router.get("/next-id", async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT id FROM inventory ORDER BY id DESC LIMIT 1`
+    );
+
+    let nextId = "ITM-0001";
+    if (rows.length > 0) {
+      const lastId = rows[0].id;
+      const numPart = parseInt(lastId.split("-")[1]);
+      nextId = `ITM-${String(numPart + 1).padStart(4, "0")}`;
+    }
+
+    res.json({ nextId });
+  } catch (error) {
+    console.error("Error getting next ID:", error);
+    res.status(500).json({ message: "Error getting next ID" });
+  }
+});
+
+// Add new inventory item
+router.post("/", async (req, res) => {
+  const { id, name, category, quantity } = req.body;
+
+  try {
+    // Determine initial status based on quantity
+    let status = "In Stock";
+    if (quantity === 0) {
+      status = "Out of Stock";
+    } else if (quantity <= 5) {
+      status = "Low Stock";
+    }
+
+    const [result] = await db.query(
+      `INSERT INTO inventory (id, Name, Category, Quantity, Status, archived) 
+       VALUES (?, ?, ?, ?, ?, 0)`,
+      [id, name, category, quantity, status]
+    );
+
+    res.status(201).json({
+      message: "Item added successfully",
+      itemId: result.insertId,
+    });
+  } catch (error) {
+    console.error("Error adding inventory item:", error);
+    res.status(500).json({ message: "Error adding inventory item" });
+  }
+});
+
 module.exports = router;
