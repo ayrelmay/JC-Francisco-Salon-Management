@@ -88,4 +88,32 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Update inventory item
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, category, quantity } = req.body;
+
+  try {
+    // Determine status based on quantity
+    let status = "In Stock";
+    if (quantity === 0) {
+      status = "Out of Stock";
+    } else if (quantity <= 5) {
+      status = "Low Stock";
+    }
+
+    await db.query(
+      `UPDATE inventory 
+       SET Name = ?, Category = ?, Quantity = ?, Status = ?
+       WHERE id = ?`,
+      [name, category, quantity, status, id]
+    );
+
+    res.json({ message: "Item updated successfully" });
+  } catch (error) {
+    console.error("Error updating inventory item:", error);
+    res.status(500).json({ message: "Error updating inventory item" });
+  }
+});
+
 module.exports = router;
