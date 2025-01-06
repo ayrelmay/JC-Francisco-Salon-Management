@@ -9,15 +9,16 @@ import {
   Users,
   LogOut,
 } from "lucide-react";
+import Logo from "../assets/logo.png";
 
 const navItems = [
-  { name: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
-  { name: "Payment", icon: CreditCard, path: "/admin/payment" },
-  { name: "Services", icon: Briefcase, path: "/admin/services" },
-  { name: "Appointment", icon: Calendar, path: "/admin/appointment" },
-  { name: "Inventory", icon: Package, path: "/admin/inventory" },
-  { name: "InvoiceHistory", icon: FileText, path: "/admin/invoicehistory" },
-  { name: "Accounts", icon: Users, path: "/admin/accounts" },
+  { name: "Dashboard", icon: LayoutDashboard, path: "./dashboard" },
+  { name: "Payment", icon: CreditCard, path: "./payment" },
+  { name: "Services", icon: Briefcase, path: "./services" },
+  { name: "Appointment", icon: Calendar, path: "./appointment" },
+  { name: "Inventory", icon: Package, path: "./inventory" },
+  { name: "InvoiceHistory", icon: FileText, path: "./invoicehistory" },
+  { name: "Accounts", icon: Users, path: "./accounts" },
 ];
 
 export default function NavSidebar() {
@@ -28,8 +29,8 @@ export default function NavSidebar() {
       {/* Logo Section */}
       <div className="p-6">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-black rounded-full" />
-          <span className="font-semibold text-FontPrimary">
+          <img src={Logo} alt="Logo" className="w-12 h-12" />
+          <span className="font-semibold text-FontPrimary text-left">
             J.C Francisco Salon
           </span>
         </div>
