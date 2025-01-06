@@ -6,16 +6,22 @@ import ConfirmationModal from "../../components/Global/ConfirmationModal"; // Im
 import SecondaryBtn from "../../components/Global/SecondaryBtn";
 import PrimaryBtn from "../../components/Global/PrimaryBtn";
 import AddInventoryModal from "../../components/Admin/AddInventoryModal"; // Import AddInventoryModal
+import SuccessfulToast from "../../components/Global/SuccessfulToast";
+import EditItemModal from "../../components/Admin/EditItemModal";
+import ViewItemModal from "../../components/Admin/ViewItemModal";
 
 const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [inventoryItems, setInventoryItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false); // State for confirmation modal
   const [showAddItemModal, setShowAddItemModal] = useState(false); // New state for AddInventoryModal
+  const [showToast, setShowToast] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false); // Separate state for edit modal
+  const [showViewModal, setShowViewModal] = useState(false); // Separate state for view modal
   // const [showArchived, setShowArchived] = useState(false); // State to manage showing archived items
+  const [toastMessage, setToastMessage] = useState({ title: "", message: "" }); // Add this new state
 
   // New function to fetch inventory items with optional archived filter
   const fetchInventory = async (archived = false) => {
@@ -57,16 +63,19 @@ const Inventory = () => {
   };
 
   // Add this render function for action buttons
-  const renderActionButtons = (inventoryItems) => (
+  const renderActionButtons = (item) => (
     <>
       <button
-        onClick={() => handleEdit(inventoryItems)}
+        onClick={(e) => handleEdit(e, item)}
         className="flex items-center justify-center w-8 h-8 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-Tableline border-opacity-30"
       >
         <SquarePen className="h-4 w-4 text-FontPrimary" />
       </button>
       <button
-        onClick={() => handleDelete(inventoryItems)}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDelete(item);
+        }}
         className="flex items-center justify-center w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100 border border-Tableline border-opacity-30"
       >
         <ArchiveRestore className="h-4 w-4" />
@@ -74,10 +83,11 @@ const Inventory = () => {
     </>
   );
 
-  // Add handleEdit function
-  const handleEdit = (item) => {
+  // Update handleEdit function to show only EditModal
+  const handleEdit = (e, item) => {
+    e.stopPropagation(); // Prevent row click event from firing
     setSelectedItem(item);
-    setShowModal(true);
+    setShowEditModal(true);
   };
 
   // Define the columns for the DataTable
@@ -135,6 +145,38 @@ const Inventory = () => {
     }
   };
 
+  // Update handleAddSuccess to include specific message
+  const handleAddSuccess = () => {
+    setToastMessage({
+      title: "Item Added",
+      message: "New inventory item has been added successfully!",
+    });
+    setShowToast(true);
+    fetchInventory(); // Refresh the data
+    setTimeout(() => {
+      setShowToast(false);
+    }, 2000);
+  };
+
+  // Update handleEditSuccess to include specific message
+  const handleEditSuccess = () => {
+    setToastMessage({
+      title: "Changes Saved",
+      message: "Item details have been updated successfully!",
+    });
+    setShowToast(true);
+    fetchInventory(); // Refresh the data
+    setTimeout(() => {
+      setShowToast(false);
+    }, 2000);
+  };
+
+  // Update handleRowClick to show only ViewModal
+  const handleRowClick = (item) => {
+    setSelectedItem(item);
+    setShowViewModal(true);
+  };
+
   return (
     <div className="p-8 max-w-7xl mx-auto">
       {/* Search and Action Buttons */}
@@ -146,9 +188,12 @@ const Inventory = () => {
         </div>
       </div>
 
-      {/* Render AddInventoryModal */}
+      {/* Render AddInventoryModal with onSuccess */}
       {showAddItemModal && (
-        <AddInventoryModal onClose={() => setShowAddItemModal(false)} />
+        <AddInventoryModal
+          onClose={() => setShowAddItemModal(false)}
+          onSuccess={handleAddSuccess}
+        />
       )}
 
       {loading ? (
@@ -158,18 +203,11 @@ const Inventory = () => {
           columns={columns}
           data={inventoryItems.map((item) => ({
             ...item,
-            statusColor: getStatusColor(item), // Add status color to each item
+            statusColor: getStatusColor(item),
+            onClick: () => handleRowClick(item),
           }))}
           actionButtons={renderActionButtons}
-          renderRow={(item) => (
-            <tr key={item.id} className={item.statusColor}>
-              <td>{item.id}</td>
-              <td>{item.name}</td>
-              <td>{item.category}</td>
-              <td>{item.quantity}</td>
-              <td>{item.status}</td>
-            </tr>
-          )}
+          onRowClick={handleRowClick}
         />
       )}
 
@@ -183,21 +221,38 @@ const Inventory = () => {
         confirmButtonText="Proceed"
       />
 
-      {/* Modal Placeholder */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full">
-            <h2 className="text-xl font-bold mb-4">Item Details</h2>
-            <p>Modal content for {selectedItem?.name} will go here</p>
-            <button
-              onClick={() => setShowModal(false)}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Close
-            </button>
-          </div>
-        </div>
+      {/* Edit Modal */}
+      {showEditModal && (
+        <EditItemModal
+          item={selectedItem}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedItem(null);
+          }}
+          onSuccess={handleEditSuccess}
+        />
       )}
+
+      {/* View Modal */}
+      {showViewModal && (
+        <ViewItemModal
+          item={selectedItem}
+          onClose={() => {
+            setShowViewModal(false);
+            setSelectedItem(null);
+          }}
+          onSuccess={handleEditSuccess}
+        />
+      )}
+
+      {/* Update SuccessfulToast to use dynamic messages */}
+      <SuccessfulToast
+        isVisible={showToast}
+        title={toastMessage.title}
+        message={toastMessage.message}
+        onClose={() => setShowToast(false)}
+        duration={2000}
+      />
     </div>
   );
 };

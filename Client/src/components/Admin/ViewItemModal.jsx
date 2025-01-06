@@ -1,26 +1,13 @@
 import PropTypes from "prop-types";
-import { Package, X } from "lucide-react";
-import PrimaryBtn from "../Global/PrimaryBtn";
-import TertiaryBtn from "../Global/TertiaryBtn";
-import { useState, useEffect } from "react";
+import { PackagePlus, X } from "lucide-react";
+import { useState } from "react";
 
-export default function EditItemModal({ onClose, item, onSuccess }) {
+export default function ViewItemModal({ onClose, item, onSuccess }) {
   const [formData, setFormData] = useState({
     name: item?.name || "",
     category: item?.category || "",
     quantity: item?.quantity || 0,
   });
-  const [hasChanges, setHasChanges] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Track initial values for comparison
-  useEffect(() => {
-    setFormData({
-      name: item?.name || "",
-      category: item?.category || "",
-      quantity: item?.quantity || 0,
-    });
-  }, [item]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -29,29 +16,12 @@ export default function EditItemModal({ onClose, item, onSuccess }) {
       [name]: value,
     };
     setFormData(newFormData);
-
-    // Check if any values are different from initial values
-    const hasAnyChanges =
-      newFormData.name !== item.name ||
-      newFormData.category !== item.category ||
-      Number(newFormData.quantity) !== item.quantity;
-
-    setHasChanges(hasAnyChanges);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!hasChanges || isSubmitting) return;
-
-    setIsSubmitting(true);
 
     try {
-      // Log the request details for debugging
-      console.log("Updating item:", {
-        id: item.id,
-        formData: formData,
-      });
-
       const response = await fetch(
         `http://localhost:3000/api/inventory/${item.id}`,
         {
@@ -67,13 +37,8 @@ export default function EditItemModal({ onClose, item, onSuccess }) {
         }
       );
 
-      // Log the response for debugging
-      console.log("Response status:", response.status);
-      const responseData = await response.json();
-      console.log("Response data:", responseData);
-
       if (!response.ok) {
-        throw new Error(responseData.message || "Failed to update item");
+        throw new Error("Failed to update item");
       }
 
       // Call onSuccess callback if provided
@@ -83,9 +48,7 @@ export default function EditItemModal({ onClose, item, onSuccess }) {
       onClose();
     } catch (error) {
       console.error("Error updating item:", error);
-      alert(error.message || "Failed to update item"); // Show error to user
-    } finally {
-      setIsSubmitting(false);
+      // You might want to show an error message to the user here
     }
   };
 
@@ -96,13 +59,13 @@ export default function EditItemModal({ onClose, item, onSuccess }) {
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <Package className="text-FontPrimary border border-gray rounded-[4px] border-opacity-50 w-11 h-11 p-[8px]" />
+              <PackagePlus className="text-FontPrimary border border-gray rounded-[4px] border-opacity-50 w-11 h-11 p-[8px]" />
               <div>
                 <h2 className="text-left text-l font-semibold text-FontPrimary">
-                  Edit Item Details
+                  View Item Details
                 </h2>
                 <p className="text-sm text-gray leading-relaxed text-left">
-                  Update the fields below to edit the item.
+                  View and edit item details
                 </p>
               </div>
             </div>
@@ -129,8 +92,8 @@ export default function EditItemModal({ onClose, item, onSuccess }) {
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                required
-                className="w-full px-4 py-2 text-sm border border-Tableline border-opacity-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-sm border border-Tableline border-opacity-50 rounded-lg focus:outline-none"
+                readOnly
               />
             </div>
             <div>
@@ -141,8 +104,8 @@ export default function EditItemModal({ onClose, item, onSuccess }) {
                 name="category"
                 value={formData.category}
                 onChange={handleInputChange}
-                required
-                className="w-full px-4 py-2 text-sm border border-Tableline border-opacity-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+                className="w-full px-4 py-2 text-sm border border-Tableline border-opacity-50 rounded-lg focus:outline-none bg-white"
+                disabled
               >
                 <option value="">Choose a category</option>
                 <option value="Hair Color">Hair Color</option>
@@ -177,28 +140,13 @@ export default function EditItemModal({ onClose, item, onSuccess }) {
                   name="quantity"
                   value={formData.quantity}
                   onChange={handleInputChange}
-                  required
-                  min="0"
-                  className="w-full px-4 py-2 text-sm border border-Tableline border-opacity-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 text-sm border border-Tableline border-opacity-50 rounded-lg focus:outline-none"
+                  readOnly
                 />
                 <span className="inline-flex items-center px-3 text-xs text-font-grey bg-gray-100 border border-Tableline border-opacity-50 rounded-lg">
                   pc/s
                 </span>
               </div>
-            </div>
-
-            <div className="-mx-6 pt-2">
-              <hr className="border-t border-Tableline opacity-50" />
-            </div>
-
-            {/* Buttons */}
-            <div className="flex gap-4 pt-2 -mx-6 px-6">
-              <TertiaryBtn type="button" onClick={onClose}>
-                Cancel
-              </TertiaryBtn>
-              <PrimaryBtn type="submit" disabled={!hasChanges || isSubmitting}>
-                {isSubmitting ? "Saving..." : "Save Changes"}
-              </PrimaryBtn>
             </div>
           </form>
         </div>
@@ -207,7 +155,7 @@ export default function EditItemModal({ onClose, item, onSuccess }) {
   );
 }
 
-EditItemModal.propTypes = {
+ViewItemModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSuccess: PropTypes.func,
   item: PropTypes.shape({
