@@ -180,6 +180,7 @@ export default function ServiceSummary({
         AdditionalFee: parseFloat(additionalFee || 0).toFixed(2),
         AmountPaid: parseFloat(amountPaid || 0).toFixed(2),
         ChangeGiven: parseFloat(change || 0).toFixed(2),
+        Status: "completed",
       };
 
       console.log("Saving payment data:", paymentData);
@@ -224,6 +225,12 @@ export default function ServiceSummary({
 
       // Store the invoice ID
       setInvoiceId(responseData.invoiceId);
+
+      // Update local state to reflect the completed status
+      setLocalPaymentDetails((prev) => ({
+        ...prev,
+        Status: "completed",
+      }));
 
       alert(
         `Payment and invoice details saved successfully. Invoice ID: ${responseData.invoiceId}`

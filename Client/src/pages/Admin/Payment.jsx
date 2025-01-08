@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"; // Add these imports
 import DataTable from "../../components/Global/datatable";
-import { SquarePen, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom"; // Add this import at the top
 import PrimaryBtn from "../../components/Global/PrimaryBtn";
 
@@ -13,7 +12,7 @@ const PaymentTable = () => {
     { key: "Id", header: "ID" },
     { key: "CustomerName", header: "Customer Name" },
     { key: "BeautyTech", header: "Beauty Tech" },
-    { key: "TotalTime", header: "Total Time" },
+    { key: "ChairNumber", header: "Chair Number" },
     { key: "TotalAmount", header: "Total Amount" },
     { key: "Status", header: "Status" },
   ];
@@ -37,43 +36,34 @@ const PaymentTable = () => {
     fetchPayments();
   }, []);
 
+  // Filter payments to only include those with status 'pending'
+  const filteredPayments = payments.filter(
+    (payment) => payment.Status === "pending"
+  );
+
   // Add this log to see what's being passed to DataTable
   console.log("Payments state:", payments);
-
-  const handleEdit = (payment) => {
-    navigate(`/PaymentEdit/${payment.Id}`);
-  };
-
-  const handleDelete = (payment) => {
-    console.log("Delete", payment);
-  };
-
   const handleRowClick = (payment) => {
     navigate(`/payment/edit/${payment.Id}`, {
-      state: { paymentData: payment },
+      state: {
+        paymentData: {
+          Id: payment.Id,
+          CustomerName: payment.CustomerName,
+          BeautyTech: payment.BeautyTech,
+          ChairNumber: payment.ChairNumber,
+          Status: payment.Status,
+          AdditionalFee: payment.AdditionalFee,
+          TotalAmount: payment.TotalAmount,
+          AmountPaid: payment.AmountPaid,
+          ChangeGiven: payment.ChangeGiven,
+        },
+      },
     });
   };
 
   const handleNewPayment = () => {
     navigate("/payment/edit/new"); // Navigate to new payment form
   };
-
-  const renderActionButtons = (payment) => (
-    <>
-      <button
-        onClick={() => handleEdit(payment)}
-        className="flex items-center justify-center w-8 h-8 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-Tableline border-opacity-30"
-      >
-        <SquarePen className="h-4 w-4" />
-      </button>
-      <button
-        onClick={() => handleDelete(payment)}
-        className="flex items-center justify-center w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100 border border-Tableline border-opacity-30"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
-    </>
-  );
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
@@ -86,8 +76,7 @@ const PaymentTable = () => {
 
         <DataTable
           columns={columns}
-          data={payments}
-          actionButtons={renderActionButtons}
+          data={filteredPayments}
           onRowClick={handleRowClick}
         />
       </div>

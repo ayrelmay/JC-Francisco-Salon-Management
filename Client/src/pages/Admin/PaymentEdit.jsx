@@ -9,6 +9,7 @@ export default function PaymentEdit() {
   const [selectedServices, setSelectedServices] = useState([]);
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [services, setServices] = useState([]);
+  const [additionalFee, setAdditionalFee] = useState(0);
 
   const categories = [
     {
@@ -95,9 +96,7 @@ export default function PaymentEdit() {
   useEffect(() => {
     const fetchPaymentData = async () => {
       try {
-        // Only fetch existing payment data if we have a real ID
         if (id && id !== "new") {
-          // Fetch payment details
           const paymentResponse = await fetch(
             `http://localhost:3000/api/payment/${id}`
           );
@@ -105,7 +104,21 @@ export default function PaymentEdit() {
             throw new Error("Failed to fetch payment details");
           }
           const paymentData = await paymentResponse.json();
-          setPaymentDetails(paymentData);
+
+          // Transform the data to match expected format
+          const formattedPaymentData = {
+            ...paymentData,
+            CustomerName: paymentData.customername,
+            BeautyTech: paymentData.beautytech,
+            ChairNumber: paymentData.chairnumber,
+            TotalAmount: paymentData.totalamount,
+            AdditionalFee: paymentData.additionalfee || 0,
+            AmountPaid: paymentData.amountpaid || 0,
+            Status: paymentData.status,
+          };
+
+          setPaymentDetails(formattedPaymentData);
+          setAdditionalFee(formattedPaymentData.AdditionalFee);
 
           // Fetch selected services for this payment
           const servicesResponse = await fetch(
@@ -116,7 +129,6 @@ export default function PaymentEdit() {
           }
           const servicesData = await servicesResponse.json();
 
-          // Transform the services data to match your selectedServices format
           const formattedServices = servicesData.map((detail) => ({
             id: detail.ServiceId,
             name: detail.ServiceName,
@@ -134,6 +146,14 @@ export default function PaymentEdit() {
 
     fetchPaymentData();
   }, [id]);
+
+  const handleAdditionalFeeChange = (fee) => {
+    setAdditionalFee(fee);
+    setPaymentDetails((prev) => ({
+      ...prev,
+      AdditionalFee: fee,
+    }));
+  };
 
   return (
     <div className="min-h-screen">
@@ -179,16 +199,15 @@ export default function PaymentEdit() {
         <div className="lg:col-span-2">
           <ServiceSummary
             selectedServices={selectedServices}
-            additionalFee={paymentDetails?.AdditionalFee || 0}
+            setSelectedServices={setSelectedServices}
+            additionalFee={additionalFee}
             onRemoveService={(index) => {
               const newServices = [...selectedServices];
               newServices.splice(index, 1);
               setSelectedServices(newServices);
             }}
             paymentDetails={paymentDetails}
-            onAdditionalFeeChange={(fee) => {
-              setPaymentDetails((prev) => ({ ...prev, AdditionalFee: fee }));
-            }}
+            onAdditionalFeeChange={handleAdditionalFeeChange}
           />
         </div>
       </div>

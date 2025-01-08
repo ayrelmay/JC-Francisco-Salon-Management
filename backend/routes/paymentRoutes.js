@@ -6,7 +6,17 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const [payments] = await db.query(
-      "SELECT  `Id`,`CustomerName`, `BeautyTech`, `TotalAmount`, `TotalTime`, `Status` FROM payments"
+      `SELECT Id,
+              CustomerName,
+              BeautyTech,
+              ChairNumber,
+              TotalAmount,
+              TotalTime,
+              AdditionalFee,
+              AmountPaid,
+              Status,
+              (AmountPaid - TotalAmount) as ChangeGiven
+       FROM payments`
     );
     res.status(200).json(payments);
   } catch (err) {
@@ -85,7 +95,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Update the PUT route to include more fields
+// Update the PUT route to include status update
 router.put("/:id", async (req, res) => {
   try {
     const {
@@ -96,6 +106,7 @@ router.put("/:id", async (req, res) => {
       AdditionalFee,
       AmountPaid,
       ChangeGiven,
+      Status,
     } = req.body;
 
     await db.query(
@@ -106,7 +117,8 @@ router.put("/:id", async (req, res) => {
            TotalAmount = ?, 
            AdditionalFee = ?, 
            AmountPaid = ?, 
-           ChangeGiven = ?
+           ChangeGiven = ?,
+           Status = ?  
        WHERE Id = ?`,
       [
         CustomerName,
@@ -116,6 +128,7 @@ router.put("/:id", async (req, res) => {
         AdditionalFee,
         AmountPaid,
         ChangeGiven,
+        Status,
         req.params.id,
       ]
     );
