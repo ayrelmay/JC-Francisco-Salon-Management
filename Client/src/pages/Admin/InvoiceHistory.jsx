@@ -18,18 +18,21 @@ const InvoiceHistory = () => {
         );
         const data = await response.json();
 
-        const formattedInvoices = data.map((invoice) => ({
-          id: invoice.invoice_id,
-          customerName: invoice.customer_name,
-          date: new Date(invoice.created_at).toLocaleDateString(),
-          amount: `Php ${parseFloat(invoice.total_amount).toLocaleString(
-            "en-US",
-            {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }
-          )}`,
-        }));
+        const formattedInvoices = data
+          .map((invoice) => ({
+            id: invoice.invoice_id,
+            customerName: invoice.customer_name,
+            date: new Date(invoice.created_at).toLocaleDateString(),
+            rawDate: new Date(invoice.created_at),
+            amount: `Php ${parseFloat(invoice.total_amount).toLocaleString(
+              "en-US",
+              {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }
+            )}`,
+          }))
+          .sort((a, b) => b.rawDate - a.rawDate);
 
         setInvoices(formattedInvoices);
       } catch (error) {
