@@ -5,12 +5,10 @@ import ConfirmationModal from "../../components/Global/ConfirmationModal";
 
 const InvoiceHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [selectedInvoice] = useState(null);
-  const [invoices, setInvoices] = useState([]);
   const [showArchiveConfirmation, setShowArchiveConfirmation] = useState(false);
   const [invoiceToArchive, setInvoiceToArchive] = useState(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [invoices, setInvoices] = useState([]);
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -131,22 +129,6 @@ const InvoiceHistory = () => {
         cancelButtonText="Cancel"
         confirmButtonText="Archive"
       />
-
-      {/* Modal Placeholder */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full">
-            <h2 className="text-xl font-bold mb-4">Invoice Details</h2>
-            <p>Modal content for Invoice {selectedInvoice?.id} will go here</p>
-            <button
-              onClick={() => setShowModal(false)}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

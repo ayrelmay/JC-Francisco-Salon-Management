@@ -1,12 +1,53 @@
 import PropTypes from "prop-types";
 import { Archive } from "lucide-react";
 import { useState } from "react";
+import ReceiptModal from "../../pages/Admin/ReceiptModal";
 
 function ClickableTable({ columns, data, onArchive }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedItem, setSelectedItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [selectedInvoiceData, setSelectedInvoiceData] = useState(null);
   const itemsPerPage = 7;
+
+  const handleRowClick = async (invoice) => {
+    try {
+      // First get invoice details to get payment_id
+      const invoiceResponse = await fetch(
+        `http://localhost:3000/api/invoice/${invoice.id}`
+      );
+      const invoiceData = await invoiceResponse.json();
+      const paymentId = invoiceData.payment_id;
+
+      // Get payment details using payment_id
+      const detailsResponse = await fetch(
+        `http://localhost:3000/api/paymentdetails/${paymentId}`
+      );
+      const detailsData = await detailsResponse.json();
+
+      // Get payment info using payment_id
+      const paymentResponse = await fetch(
+        `http://localhost:3000/api/payments/${paymentId}`
+      );
+      const paymentData = await paymentResponse.json();
+
+      setSelectedInvoiceData({
+        services: detailsData.map((service) => ({
+          name: service.ServiceName,
+          price: parseFloat(service.ServicePrice),
+        })),
+        beautyTech: paymentData.beautytech,
+        totalAmount: parseFloat(paymentData.totalamount),
+        additionalFee: parseFloat(paymentData.additionalfee || 0),
+        amountPaid: parseFloat(paymentData.amountpaid),
+        change: parseFloat(paymentData.changegiven),
+      });
+      setSelectedInvoice(invoice);
+      setShowModal(true);
+    } catch (error) {
+      console.error("Error fetching payment details:", error);
+    }
+  };
 
   // Pagination logic
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -16,17 +57,6 @@ function ClickableTable({ columns, data, onArchive }) {
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
-
-  const handleRowClick = (item) => {
-    setSelectedItem(item);
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedItem(null);
-  };
-
   return (
     <div className="w-full">
       <div className="overflow-x-auto rounded-lg border border-Tableline border-opacity-30">
@@ -51,7 +81,7 @@ function ClickableTable({ columns, data, onArchive }) {
               <tr
                 key={index}
                 onClick={() => handleRowClick(item)}
-                className="border-b border-Tableline border-opacity-50 transition-colors hover:bg-gray-50"
+                className="border-b border-Tableline border-opacity-50 transition-colors hover:bg-gray-50 cursor-pointer"
               >
                 {columns.map((column) => (
                   <td
@@ -101,28 +131,12 @@ function ClickableTable({ columns, data, onArchive }) {
         </div>
       )}
 
-      {/* Modal */}
-      {showModal && selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-            <h3 className="mb-4 text-lg font-semibold">Invoice Details</h3>
-            {columns.map((column) => (
-              <div key={column.key} className="mb-2">
-                <span className="font-medium">{column.header}: </span>
-                <span>{selectedItem[column.key]}</span>
-              </div>
-            ))}
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={handleCloseModal}
-                className="rounded bg-gray-100 px-4 py-2 text-sm text-gray-600 hover:bg-gray-200"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ReceiptModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        invoiceId={selectedInvoice?.id}
+        paymentData={selectedInvoiceData}
+      />
     </div>
   );
 }
@@ -136,6 +150,7 @@ ClickableTable.propTypes = {
   ).isRequired,
   data: PropTypes.arrayOf(PropTypes.object).isRequired,
   onArchive: PropTypes.func,
+  onRowClick: PropTypes.func,
 };
 
 export default ClickableTable;

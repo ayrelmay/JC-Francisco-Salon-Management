@@ -19,11 +19,11 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const [payment] = await db.query(
-      `SELECT Id, CustomerName, BeautyTech, ChairNumber, TotalAmount, 
-              TotalTime, AdditionalFee, AmountPaid, Status,
-              (AmountPaid - TotalAmount) as ChangeGiven
+      `SELECT id, customername, beautytech, chairnumber, totalamount, 
+              totaltime, additionalfee, amountpaid, status,
+              (amountpaid - totalamount) as changegiven
        FROM payments 
-       WHERE Id = ?`,
+       WHERE id = ?`,
       [req.params.id]
     );
 
