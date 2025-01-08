@@ -95,43 +95,44 @@ export default function PaymentEdit() {
   useEffect(() => {
     const fetchPaymentData = async () => {
       try {
-        // Fetch payment details
-        const paymentResponse = await fetch(
-          `http://localhost:3000/api/payment/${id}`
-        );
-        if (!paymentResponse.ok) {
-          throw new Error("Failed to fetch payment details");
+        // Only fetch existing payment data if we have a real ID
+        if (id && id !== "new") {
+          // Fetch payment details
+          const paymentResponse = await fetch(
+            `http://localhost:3000/api/payment/${id}`
+          );
+          if (!paymentResponse.ok) {
+            throw new Error("Failed to fetch payment details");
+          }
+          const paymentData = await paymentResponse.json();
+          setPaymentDetails(paymentData);
+
+          // Fetch selected services for this payment
+          const servicesResponse = await fetch(
+            `http://localhost:3000/api/paymentdetails/${id}`
+          );
+          if (!servicesResponse.ok) {
+            throw new Error("Failed to fetch payment services");
+          }
+          const servicesData = await servicesResponse.json();
+
+          // Transform the services data to match your selectedServices format
+          const formattedServices = servicesData.map((detail) => ({
+            id: detail.ServiceId,
+            name: detail.ServiceName,
+            price: parseFloat(detail.ServicePrice),
+            category: detail.Category,
+            quantity: 1,
+          }));
+
+          setSelectedServices(formattedServices);
         }
-        const paymentData = await paymentResponse.json();
-        setPaymentDetails(paymentData);
-
-        // Fetch selected services for this payment
-        const servicesResponse = await fetch(
-          `http://localhost:3000/api/paymentdetails/${id}`
-        );
-        if (!servicesResponse.ok) {
-          throw new Error("Failed to fetch payment services");
-        }
-        const servicesData = await servicesResponse.json();
-
-        // Transform the services data to match your selectedServices format
-        const formattedServices = servicesData.map((detail) => ({
-          id: detail.ServiceId,
-          name: detail.ServiceName,
-          price: parseFloat(detail.ServicePrice),
-          category: detail.Category,
-          quantity: 1,
-        }));
-
-        setSelectedServices(formattedServices);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
-    if (id) {
-      fetchPaymentData();
-    }
+    fetchPaymentData();
   }, [id]);
 
   return (

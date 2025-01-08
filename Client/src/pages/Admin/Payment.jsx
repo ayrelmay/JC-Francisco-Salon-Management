@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"; // Add these imports
 import DataTable from "../../components/Global/datatable";
 import { SquarePen, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom"; // Add this import at the top
+import PrimaryBtn from "../../components/Global/PrimaryBtn";
 
 const PaymentTable = () => {
   const [payments, setPayments] = useState([]); // Add state for payments
@@ -40,7 +41,7 @@ const PaymentTable = () => {
   console.log("Payments state:", payments);
 
   const handleEdit = (payment) => {
-    navigate(`/PaymentEdit/${payment.Id}`); // Update handleEdit to navigate
+    navigate(`/PaymentEdit/${payment.Id}`);
   };
 
   const handleDelete = (payment) => {
@@ -48,7 +49,13 @@ const PaymentTable = () => {
   };
 
   const handleRowClick = (payment) => {
-    navigate(`/payment/edit/${payment.Id}`);
+    navigate(`/payment/edit/${payment.Id}`, {
+      state: { paymentData: payment },
+    });
+  };
+
+  const handleNewPayment = () => {
+    navigate("/payment/edit/new"); // Navigate to new payment form
   };
 
   const renderActionButtons = (payment) => (
@@ -71,6 +78,12 @@ const PaymentTable = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
+        <div className="flex justify-end mb-4">
+          <div className="w-{15px}/12">
+            <PrimaryBtn onClick={handleNewPayment}>New Payment</PrimaryBtn>
+          </div>
+        </div>
+
         <DataTable
           columns={columns}
           data={payments}

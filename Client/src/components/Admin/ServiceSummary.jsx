@@ -16,6 +16,26 @@ export default function ServiceSummary({
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [invoiceId, setInvoiceId] = useState(null);
 
+  // Add new state for editable fields
+  const [localPaymentDetails, setLocalPaymentDetails] = useState({
+    CustomerName: paymentDetails?.CustomerName || "",
+    BeautyTech: paymentDetails?.BeautyTech || "",
+    ChairNumber: paymentDetails?.ChairNumber || "",
+    Status: paymentDetails?.Status || "",
+  });
+
+  // Update local state when paymentDetails prop changes
+  useEffect(() => {
+    if (paymentDetails) {
+      setLocalPaymentDetails({
+        CustomerName: paymentDetails.CustomerName || "",
+        BeautyTech: paymentDetails.BeautyTech || "",
+        ChairNumber: paymentDetails.ChairNumber || "",
+        Status: paymentDetails.Status || "",
+      });
+    }
+  }, [paymentDetails]);
+
   const getCategoryColor = (category) => {
     switch (category.toLowerCase()) {
       case "beauty":
@@ -55,8 +75,10 @@ export default function ServiceSummary({
 
   const handleSave = async () => {
     try {
-      // First save payment details
       const paymentData = {
+        CustomerName: localPaymentDetails.CustomerName,
+        BeautyTech: localPaymentDetails.BeautyTech,
+        ChairNumber: localPaymentDetails.ChairNumber,
         TotalAmount: parseFloat(total || 0).toFixed(2),
         AdditionalFee: parseFloat(additionalFee || 0).toFixed(2),
         AmountPaid: parseFloat(amountPaid || 0).toFixed(2),
@@ -114,8 +136,10 @@ export default function ServiceSummary({
 
   const handlePayNow = async () => {
     try {
-      // First save payment details
       const paymentData = {
+        CustomerName: localPaymentDetails.CustomerName,
+        BeautyTech: localPaymentDetails.BeautyTech,
+        ChairNumber: localPaymentDetails.ChairNumber,
         TotalAmount: parseFloat(total || 0).toFixed(2),
         AdditionalFee: parseFloat(additionalFee || 0).toFixed(2),
         AmountPaid: parseFloat(amountPaid || 0).toFixed(2),
@@ -185,25 +209,51 @@ export default function ServiceSummary({
       <div className="space-y-2 mb-4 border-b pb-4 border-Tableline border-opacity-20">
         <div className="flex justify-between items-center text-sm">
           <span>Customer Name:</span>
-          <span className="font-medium">
-            {paymentDetails?.CustomerName || "-"}
-          </span>
+          <input
+            type="text"
+            value={localPaymentDetails.CustomerName}
+            onChange={(e) =>
+              setLocalPaymentDetails((prev) => ({
+                ...prev,
+                CustomerName: e.target.value,
+              }))
+            }
+            className="font-medium text-right bg-transparent focus:outline-none focus:border-b border-gray-300"
+          />
         </div>
         <div className="flex justify-between items-center text-sm">
           <span>Beauty Tech:</span>
-          <span className="font-medium">
-            {paymentDetails?.BeautyTech || "-"}
-          </span>
+          <input
+            type="text"
+            value={localPaymentDetails.BeautyTech}
+            onChange={(e) =>
+              setLocalPaymentDetails((prev) => ({
+                ...prev,
+                BeautyTech: e.target.value,
+              }))
+            }
+            className="font-medium text-right bg-transparent focus:outline-none focus:border-b border-gray-300"
+          />
         </div>
         <div className="flex justify-between items-center text-sm">
           <span>Chair Number:</span>
-          <span className="font-medium">
-            {paymentDetails?.ChairNumber || "-"}
-          </span>
+          <input
+            type="number"
+            value={localPaymentDetails.ChairNumber}
+            onChange={(e) =>
+              setLocalPaymentDetails((prev) => ({
+                ...prev,
+                ChairNumber: e.target.value,
+              }))
+            }
+            className="font-medium text-right bg-transparent focus:outline-none focus:border-b border-gray-300 w-20"
+          />
         </div>
         <div className="flex justify-between items-center text-sm">
           <span>Status:</span>
-          <span className="font-medium">{paymentDetails?.Status || "-"}</span>
+          <span className="font-medium">
+            {localPaymentDetails.Status || "-"}
+          </span>
         </div>
       </div>
 
