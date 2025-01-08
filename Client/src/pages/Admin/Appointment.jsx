@@ -106,11 +106,17 @@ const Appointments = () => {
         </div>
       </div>
 
-      {/* Appointment Table - passing raw appointments data */}
-      <AppointmentTable
-        data={filteredAppointments}
-        onRefresh={fetchAppointments}
-      />
+      {/* Show message when no appointments are found */}
+      {filteredAppointments.length === 0 && activeTab === "Today" ? (
+        <div className="text-center text-gray-500 py-8">
+          No appointments scheduled for today
+        </div>
+      ) : (
+        <AppointmentTable
+          data={filteredAppointments}
+          onRefresh={fetchAppointments}
+        />
+      )}
     </div>
   );
 };
