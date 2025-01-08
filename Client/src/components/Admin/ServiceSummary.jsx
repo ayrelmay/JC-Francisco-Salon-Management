@@ -98,6 +98,7 @@ export default function ServiceSummary({
 
   const handleSave = async () => {
     try {
+      // First save the payment data (existing code)
       const paymentData = {
         CustomerName: localPaymentDetails.CustomerName,
         BeautyTech: localPaymentDetails.BeautyTech,
@@ -108,14 +109,11 @@ export default function ServiceSummary({
         ChangeGiven: parseFloat(change || 0).toFixed(2),
       };
 
-      console.log("Saving payment data:", paymentData);
-
-      // If id is 'new', create a new payment, otherwise update existing
+      // Save payment data
       const endpoint =
         id === "new"
           ? "http://localhost:3000/api/payment"
           : `http://localhost:3000/api/payment/${id}`;
-
       const method = id === "new" ? "POST" : "PUT";
 
       const paymentResponse = await fetch(endpoint, {
@@ -131,6 +129,30 @@ export default function ServiceSummary({
       }
 
       const savedPayment = await paymentResponse.json();
+      const paymentId = id === "new" ? savedPayment.id : id;
+
+      // Now save the selected services to paymentDetails
+      const servicesData = {
+        services: selectedServices.map((service) => ({
+          id: service.id, // Make sure your service objects have an id property
+          price: parseFloat(service.price),
+        })),
+      };
+
+      const paymentDetailsResponse = await fetch(
+        `http://localhost:3000/api/paymentDetails/save/${paymentId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(servicesData),
+        }
+      );
+
+      if (!paymentDetailsResponse.ok) {
+        throw new Error(
+          `Failed to save service details: ${paymentDetailsResponse.status}`
+        );
+      }
 
       // If this was a new payment, update the URL with the new ID
       if (id === "new" && savedPayment.id) {
@@ -141,7 +163,7 @@ export default function ServiceSummary({
         );
       }
 
-      alert("Payment details saved successfully.");
+      alert("Payment and service details saved successfully.");
     } catch (error) {
       console.error("Error saving details:", error);
       alert(`Failed to save details: ${error.message}`);
