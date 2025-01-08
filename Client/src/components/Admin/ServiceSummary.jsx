@@ -86,14 +86,20 @@ export default function ServiceSummary({
       };
 
       console.log("Saving payment data:", paymentData);
-      const paymentResponse = await fetch(
-        `http://localhost:3000/api/payment/${id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(paymentData),
-        }
-      );
+
+      // If id is 'new', create a new payment, otherwise update existing
+      const endpoint =
+        id === "new"
+          ? "http://localhost:3000/api/payment"
+          : `http://localhost:3000/api/payment/${id}`;
+
+      const method = id === "new" ? "POST" : "PUT";
+
+      const paymentResponse = await fetch(endpoint, {
+        method: method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(paymentData),
+      });
 
       if (!paymentResponse.ok) {
         throw new Error(
@@ -101,33 +107,18 @@ export default function ServiceSummary({
         );
       }
 
-      // Then create invoice
-      const invoiceData = {
-        paymentId: id,
-        customerName: paymentDetails.CustomerName,
-        totalAmount: parseFloat(total).toFixed(2),
-        amountPaid: parseFloat(amountPaid).toFixed(2),
-        changeGiven: parseFloat(change).toFixed(2),
-        status: "completed",
-      };
+      const savedPayment = await paymentResponse.json();
 
-      console.log("Creating invoice with data:", invoiceData);
-      const invoiceResponse = await fetch("http://localhost:3000/api/invoice", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(invoiceData),
-      });
-
-      const responseData = await invoiceResponse.json();
-      console.log("Invoice response:", responseData);
-
-      if (!invoiceResponse.ok) {
-        throw new Error(`Invoice creation failed: ${responseData.message}`);
+      // If this was a new payment, update the URL with the new ID
+      if (id === "new" && savedPayment.id) {
+        window.history.replaceState(
+          null,
+          "",
+          `/payment/edit/${savedPayment.id}`
+        );
       }
 
-      alert(
-        `Payment and invoice details saved successfully. Invoice ID: ${responseData.invoiceId}`
-      );
+      alert("Payment details saved successfully.");
     } catch (error) {
       console.error("Error saving details:", error);
       alert(`Failed to save details: ${error.message}`);

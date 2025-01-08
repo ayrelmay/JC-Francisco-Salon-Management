@@ -38,19 +38,86 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Add this PUT route to update payment
+// POST new payment
+router.post("/", async (req, res) => {
+  try {
+    const {
+      CustomerName,
+      BeautyTech,
+      ChairNumber,
+      TotalAmount,
+      AdditionalFee,
+      AmountPaid,
+      ChangeGiven,
+    } = req.body;
+
+    // Insert the new payment
+    const [result] = await db.query(
+      `INSERT INTO payments (
+        CustomerName,
+        BeautyTech,
+        ChairNumber,
+        TotalAmount,
+        AdditionalFee,
+        AmountPaid,
+        ChangeGiven,
+        Status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      [
+        CustomerName,
+        BeautyTech,
+        ChairNumber,
+        TotalAmount,
+        AdditionalFee,
+        AmountPaid,
+        ChangeGiven,
+      ]
+    );
+
+    // Return the new payment ID
+    res.status(201).json({
+      message: "Payment created successfully",
+      id: result.insertId,
+    });
+  } catch (err) {
+    console.error("Error creating payment:", err.message);
+    res.status(500).json({ error: "Failed to create payment" });
+  }
+});
+
+// Update the PUT route to include more fields
 router.put("/:id", async (req, res) => {
   try {
-    const { TotalAmount, AdditionalFee, AmountPaid, ChangeGiven } = req.body;
+    const {
+      CustomerName,
+      BeautyTech,
+      ChairNumber,
+      TotalAmount,
+      AdditionalFee,
+      AmountPaid,
+      ChangeGiven,
+    } = req.body;
 
     await db.query(
       `UPDATE payments 
-       SET TotalAmount = ?, 
+       SET CustomerName = ?,
+           BeautyTech = ?,
+           ChairNumber = ?,
+           TotalAmount = ?, 
            AdditionalFee = ?, 
            AmountPaid = ?, 
            ChangeGiven = ?
        WHERE Id = ?`,
-      [TotalAmount, AdditionalFee, AmountPaid, ChangeGiven, req.params.id]
+      [
+        CustomerName,
+        BeautyTech,
+        ChairNumber,
+        TotalAmount,
+        AdditionalFee,
+        AmountPaid,
+        ChangeGiven,
+        req.params.id,
+      ]
     );
 
     res.status(200).json({ message: "Payment updated successfully" });
