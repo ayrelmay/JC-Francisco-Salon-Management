@@ -24,6 +24,9 @@ export default function ServiceSummary({
     Status: paymentDetails?.Status || "",
   });
 
+  // Add new state for technicians
+  const [technicians, setTechnicians] = useState([]);
+
   // Update local state when paymentDetails prop changes
   useEffect(() => {
     if (paymentDetails) {
@@ -35,6 +38,26 @@ export default function ServiceSummary({
       });
     }
   }, [paymentDetails]);
+
+  // Add useEffect to fetch technicians
+  useEffect(() => {
+    const fetchTechnicians = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/employee/technicians"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch technicians");
+        }
+        const data = await response.json();
+        setTechnicians(data);
+      } catch (error) {
+        console.error("Error fetching technicians:", error);
+      }
+    };
+
+    fetchTechnicians();
+  }, []);
 
   const getCategoryColor = (category) => {
     switch (category.toLowerCase()) {
@@ -192,6 +215,9 @@ export default function ServiceSummary({
     }
   };
 
+  // Create array of chair numbers 1-10
+  const chairNumbers = Array.from({ length: 10 }, (_, i) => i + 1);
+
   return (
     <div className="px-10 py-8 bg-white rounded-lg shadow border border-Tableline border-opacity-20 text-left h-full">
       <h2 className="text-xl font-bold mb-4">Service summary</h2>
@@ -214,8 +240,7 @@ export default function ServiceSummary({
         </div>
         <div className="flex justify-between items-center text-sm">
           <span>Beauty Tech:</span>
-          <input
-            type="text"
+          <select
             value={localPaymentDetails.BeautyTech}
             onChange={(e) =>
               setLocalPaymentDetails((prev) => ({
@@ -223,13 +248,19 @@ export default function ServiceSummary({
                 BeautyTech: e.target.value,
               }))
             }
-            className="font-medium text-right bg-transparent focus:outline-none focus:border-b border-gray-300"
-          />
+            className="font-medium text-right bg-transparent focus:outline-none focus:border-b border-gray-300 pr-2"
+          >
+            <option value="">Select Technician</option>
+            {technicians.map((tech) => (
+              <option key={tech.ID} value={tech.name}>
+                {tech.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="flex justify-between items-center text-sm">
           <span>Chair Number:</span>
-          <input
-            type="number"
+          <select
             value={localPaymentDetails.ChairNumber}
             onChange={(e) =>
               setLocalPaymentDetails((prev) => ({
@@ -237,8 +268,15 @@ export default function ServiceSummary({
                 ChairNumber: e.target.value,
               }))
             }
-            className="font-medium text-right bg-transparent focus:outline-none focus:border-b border-gray-300 w-20"
-          />
+            className="font-medium text-right bg-transparent focus:outline-none focus:border-b border-gray-300 pr-2"
+          >
+            <option value="">Select Chair</option>
+            {chairNumbers.map((num) => (
+              <option key={num} value={num}>
+                Chair {num}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="flex justify-between items-center text-sm">
           <span>Status:</span>

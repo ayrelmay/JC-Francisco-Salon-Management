@@ -102,7 +102,20 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Fetch a specific employee by ID
+// Move the technicians route BEFORE the /:id route
+router.get("/technicians", async (req, res) => {
+  try {
+    const [technicians] = await db.query(
+      "SELECT ID, name FROM employee WHERE role = 'technician' AND status = 'available'"
+    );
+    res.status(200).json(technicians);
+  } catch (err) {
+    console.error("Error fetching technicians:", err.message);
+    res.status(500).json({ error: "Failed to retrieve technicians" });
+  }
+});
+
+// Keep the specific ID route after more specific routes
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
