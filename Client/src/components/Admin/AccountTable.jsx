@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { SquarePen, ArchiveRestore } from "lucide-react";
 
 const AccountTable = ({ data }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,6 +27,33 @@ const AccountTable = ({ data }) => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(data.length / itemsPerPage);
+
+  const handleEdit = (employee) => {
+    // Implement edit functionality
+    console.log("Edit employee:", employee);
+  };
+
+  const handleDelete = (employee) => {
+    // Implement delete functionality
+    console.log("Delete employee:", employee);
+  };
+
+  const renderActionButtons = (employee) => (
+    <div className="flex items-center justify-center gap-2">
+      <button
+        onClick={() => handleEdit(employee)}
+        className="flex items-center justify-center w-8 h-8 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-Tableline border-opacity-30"
+      >
+        <SquarePen className="h-4 w-4" />
+      </button>
+      <button
+        onClick={() => handleDelete(employee)}
+        className="flex items-center justify-center w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100 border border-Tableline border-opacity-30"
+      >
+        <ArchiveRestore className="h-4 w-4" />
+      </button>
+    </div>
+  );
 
   return (
     <div className="w-full">
@@ -88,9 +115,7 @@ const AccountTable = ({ data }) => {
                       employee.status.slice(1)}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-center">
-                  <MoreHorizontal className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                </td>
+                <td className="px-6 py-4">{renderActionButtons(employee)}</td>
               </tr>
             ))}
           </tbody>
