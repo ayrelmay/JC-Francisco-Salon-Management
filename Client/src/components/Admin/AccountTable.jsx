@@ -1,9 +1,12 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
-import { SquarePen, ArchiveRestore } from "lucide-react";
+import { SquarePen, Trash2 } from "lucide-react";
+import EditEmployeeModal from "./EditEmployeeModal";
 
-const AccountTable = ({ data }) => {
+const AccountTable = ({ data, onRefresh }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const itemsPerPage = 7;
 
   const getStatusColor = (status) => {
@@ -28,9 +31,9 @@ const AccountTable = ({ data }) => {
   const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(data.length / itemsPerPage);
 
-  const handleEdit = (employee) => {
-    // Implement edit functionality
-    console.log("Edit employee:", employee);
+  const handleCloseModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedEmployee(null);
   };
 
   const handleDelete = (employee) => {
@@ -41,7 +44,10 @@ const AccountTable = ({ data }) => {
   const renderActionButtons = (employee) => (
     <div className="flex items-center justify-center gap-2">
       <button
-        onClick={() => handleEdit(employee)}
+        onClick={() => {
+          setSelectedEmployee(employee);
+          setIsEditModalOpen(true);
+        }}
         className="flex items-center justify-center w-8 h-8 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-Tableline border-opacity-30"
       >
         <SquarePen className="h-4 w-4" />
@@ -50,7 +56,7 @@ const AccountTable = ({ data }) => {
         onClick={() => handleDelete(employee)}
         className="flex items-center justify-center w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100 border border-Tableline border-opacity-30"
       >
-        <ArchiveRestore className="h-4 w-4" />
+        <Trash2 className="h-4 w-4" />
       </button>
     </div>
   );
@@ -72,9 +78,6 @@ const AccountTable = ({ data }) => {
               </th>
               <th className="border-b border-Tableline border-opacity-30 px-6 py-4 text-left text-[12px] font-semibold text-gray-600">
                 Email
-              </th>
-              <th className="border-b border-Tableline border-opacity-30 px-6 py-4 text-left text-[12px] font-semibold text-gray-600">
-                Recent Act
               </th>
               <th className="border-b border-Tableline border-opacity-30 px-6 py-4 text-left text-[12px] font-semibold text-gray-600">
                 Status
@@ -102,9 +105,6 @@ const AccountTable = ({ data }) => {
                 <td className="px-6 py-4 text-[12px] text-gray-600">
                   {employee.email}
                 </td>
-                <td className="px-6 py-4 text-[12px] text-gray-600">
-                  {employee.recentAct}
-                </td>
                 <td className="px-6 py-4 text-[12px]">
                   <span
                     className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusColor(
@@ -121,6 +121,14 @@ const AccountTable = ({ data }) => {
           </tbody>
         </table>
       </div>
+
+      {/* Edit Modal */}
+      <EditEmployeeModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseModal}
+        employee={selectedEmployee}
+        onUpdate={onRefresh}
+      />
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -155,6 +163,7 @@ AccountTable.propTypes = {
       status: PropTypes.string.isRequired,
     })
   ).isRequired,
+  onRefresh: PropTypes.func.isRequired,
 };
 
 export default AccountTable;

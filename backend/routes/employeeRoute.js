@@ -133,4 +133,35 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// Add this route to your employeeRoute.js
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, email, password, role, status } = req.body;
+
+  try {
+    let query = "UPDATE employee SET name = ?, email = ?, role = ?, status = ?";
+    let params = [name, email, role, status];
+
+    // Only include password in update if it was provided
+    if (password) {
+      query += ", password = ?";
+      params.push(password);
+    }
+
+    query += " WHERE ID = ?";
+    params.push(id);
+
+    const [result] = await db.query(query, params);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    res.status(200).json({ message: "Employee updated successfully" });
+  } catch (err) {
+    console.error("Error updating employee:", err.message);
+    res.status(500).json({ error: "Failed to update employee" });
+  }
+});
+
 module.exports = router;

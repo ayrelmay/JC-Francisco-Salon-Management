@@ -142,11 +142,6 @@ export default function NewEmployee({ isOpen, onClose }) {
             <h2 className="text-xl font-semibold text-gray-900">
               Edit Employee Account
             </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Fill in the details below to add a new employees account. Required
-              fields are marked with an asterisk (*) and should be completed
-              before submission.
-            </p>
           </div>
           <button
             onClick={onClose}

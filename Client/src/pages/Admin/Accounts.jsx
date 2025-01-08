@@ -2,25 +2,31 @@ import { useState, useEffect } from "react";
 import { Search, Plus } from "lucide-react";
 import AccountTable from "../../components/Admin/AccountTable";
 import NewEmployee from "../../components/Admin/NewEmployee";
+import SuccessfulToast from "../../components/Global/SuccessfulToast";
 
 const Accounts = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [employees, setEmployees] = useState([]);
   const [isNewEmployeeModalOpen, setIsNewEmployeeModalOpen] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/employee");
+      if (!response.ok) throw new Error("Failed to fetch");
+      const data = await response.json();
+      setEmployees(data);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    }
+  };
+
+  const handleUpdateSuccess = () => {
+    fetchEmployees();
+    setShowToast(true);
+  };
 
   useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/api/employee");
-        if (!response.ok) throw new Error("Failed to fetch");
-        const data = await response.json();
-        setEmployees(data);
-      } catch (error) {
-        console.error("Error fetching employees:", error);
-        // Handle error appropriately
-      }
-    };
-
     fetchEmployees();
   }, []);
 
@@ -53,11 +59,18 @@ const Accounts = () => {
         </button>
       </div>
 
-      <AccountTable data={filteredEmployees} />
+      <AccountTable data={filteredEmployees} onRefresh={handleUpdateSuccess} />
 
       <NewEmployee
         isOpen={isNewEmployeeModalOpen}
         onClose={() => setIsNewEmployeeModalOpen(false)}
+      />
+
+      <SuccessfulToast
+        title="Success"
+        message="Changes Saved"
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
       />
     </div>
   );
