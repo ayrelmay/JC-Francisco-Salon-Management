@@ -9,6 +9,7 @@ const Accounts = () => {
   const [employees, setEmployees] = useState([]);
   const [isNewEmployeeModalOpen, setIsNewEmployeeModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   const fetchEmployees = async () => {
     try {
@@ -21,8 +22,9 @@ const Accounts = () => {
     }
   };
 
-  const handleUpdateSuccess = () => {
+  const handleUpdateSuccess = (message = "Changes Saved") => {
     fetchEmployees();
+    setToastMessage(message);
     setShowToast(true);
   };
 
@@ -59,7 +61,10 @@ const Accounts = () => {
         </button>
       </div>
 
-      <AccountTable data={filteredEmployees} onRefresh={handleUpdateSuccess} />
+      <AccountTable
+        data={filteredEmployees}
+        onRefresh={() => handleUpdateSuccess("Account is deleted successfully")}
+      />
 
       <NewEmployee
         isOpen={isNewEmployeeModalOpen}
@@ -68,7 +73,7 @@ const Accounts = () => {
 
       <SuccessfulToast
         title="Success"
-        message="Changes Saved"
+        message={toastMessage}
         isVisible={showToast}
         onClose={() => setShowToast(false)}
       />

@@ -164,4 +164,22 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+// Add this route to handle employee deletion
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await db.query("DELETE FROM employee WHERE ID = ?", [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    res.status(200).json({ message: "Employee deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting employee:", err.message);
+    res.status(500).json({ error: "Failed to delete employee" });
+  }
+});
+
 module.exports = router;

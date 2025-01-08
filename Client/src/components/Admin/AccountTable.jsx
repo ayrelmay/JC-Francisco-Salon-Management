@@ -2,11 +2,13 @@ import PropTypes from "prop-types";
 import { useState } from "react";
 import { SquarePen, Trash2 } from "lucide-react";
 import EditEmployeeModal from "./EditEmployeeModal";
+import ConfirmationModal from "../Global/ConfirmationModal";
 
 const AccountTable = ({ data, onRefresh }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const itemsPerPage = 7;
 
   const getStatusColor = (status) => {
@@ -31,14 +33,22 @@ const AccountTable = ({ data, onRefresh }) => {
   const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(data.length / itemsPerPage);
 
-  const handleCloseModal = () => {
-    setIsEditModalOpen(false);
-    setSelectedEmployee(null);
-  };
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/employee/${selectedEmployee.ID}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-  const handleDelete = (employee) => {
-    // Implement delete functionality
-    console.log("Delete employee:", employee);
+      if (!response.ok) throw new Error("Failed to delete employee");
+
+      setIsDeleteModalOpen(false);
+      onRefresh(); // This will trigger the toast in Accounts.jsx
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+    }
   };
 
   const renderActionButtons = (employee) => (
@@ -53,7 +63,10 @@ const AccountTable = ({ data, onRefresh }) => {
         <SquarePen className="h-4 w-4" />
       </button>
       <button
-        onClick={() => handleDelete(employee)}
+        onClick={() => {
+          setSelectedEmployee(employee);
+          setIsDeleteModalOpen(true);
+        }}
         className="flex items-center justify-center w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100 border border-Tableline border-opacity-30"
       >
         <Trash2 className="h-4 w-4" />
@@ -125,9 +138,17 @@ const AccountTable = ({ data, onRefresh }) => {
       {/* Edit Modal */}
       <EditEmployeeModal
         isOpen={isEditModalOpen}
-        onClose={handleCloseModal}
+        onClose={() => setIsEditModalOpen(false)}
         employee={selectedEmployee}
         onUpdate={onRefresh}
+      />
+
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        message="Are you sure you want to delete this account?"
+        confirmButtonText="Delete"
       />
 
       {/* Pagination */}
