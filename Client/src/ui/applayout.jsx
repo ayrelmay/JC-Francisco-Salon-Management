@@ -14,7 +14,7 @@ export default function AppLayout() {
     if (path.startsWith("/services")) return "Services";
     if (path.startsWith("/appointment")) return "Appointment";
     if (path.startsWith("/inventory")) return "Inventory";
-    if (path.startsWith("/invoiceHistory")) return "Invoice History";
+    if (path.startsWith("/invoicehistory")) return "Invoice History";
     if (path.startsWith("/accounts")) return "Accounts";
 
     // Default case
