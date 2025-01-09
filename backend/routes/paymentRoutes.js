@@ -25,15 +25,22 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET specific payment by ID
+// GET specific payment by ID (fixed version)
 router.get("/:id", async (req, res) => {
   try {
     const [payment] = await db.query(
-      `SELECT id, customername, beautytech, chairnumber, totalamount, 
-              totaltime, additionalfee, amountpaid, status,
-              (amountpaid - totalamount) as changegiven
+      `SELECT Id, 
+              CustomerName, 
+              BeautyTech, 
+              ChairNumber, 
+              TotalAmount, 
+              TotalTime, 
+              AdditionalFee, 
+              AmountPaid, 
+              Status,
+              (AmountPaid - TotalAmount) as ChangeGiven
        FROM payments 
-       WHERE id = ?`,
+       WHERE Id = ?`,
       [req.params.id]
     );
 

@@ -1,58 +1,50 @@
 const express = require("express");
-const db = require("../db"); // Import the database connection
+const db = require("../db");
 const router = express.Router();
 
-// GET all paymentsdetails
+// Get all payment details
 router.get("/", async (req, res) => {
   try {
-    const [payments] = await db.query("SELECT * FROM paymentdetails");
-    res.status(200).json(payments);
-  } catch (err) {
-    console.error("Error fetching payments:", err.message);
-    res.status(500).json({ error: "Failed to retrieve payments" });
+    const [details] = await db.query("SELECT * FROM paymentdetails");
+    res.json(details);
+  } catch (error) {
+    console.error("Error fetching payment details:", error);
+    res.status(500).json({ message: "Error fetching payment details" });
   }
 });
 
-// GET payment details by payment ID
-router.get("/:paymentId", async (req, res) => {
+// Get payment details by payment ID
+router.get("/bypayment/:paymentId", async (req, res) => {
   try {
     const [details] = await db.query(
-      `SELECT pd.*, s.ServiceName, s.ServicePrice, s.Category 
-       FROM paymentdetails AS pd
-       JOIN service AS s ON pd.ServiceId = s.Id
-       WHERE pd.PaymentId = ?`,
+      "SELECT pd.*, s.ServiceName FROM paymentdetails pd LEFT JOIN service s ON pd.ServiceId = s.Id WHERE pd.PaymentId = ?",
       [req.params.paymentId]
     );
-    res.status(200).json(details);
-  } catch (err) {
-    console.error("Error fetching payment details:", err.message);
-    res.status(500).json({ error: "Failed to retrieve payment details" });
+
+    console.log("Payment Details Query Result:", details); // Debug log
+    res.json(details);
+  } catch (error) {
+    console.error("Error fetching payment details:", error);
+    res.status(500).json({ message: "Error fetching payment details" });
   }
 });
 
-// Add this route handler
-router.post("/save/:paymentId", async (req, res) => {
+// Get payment details by ID
+router.get("/:id", async (req, res) => {
   try {
-    const { services } = req.body;
-    const paymentId = req.params.paymentId;
+    const [details] = await db.query(
+      "SELECT * FROM paymentdetails WHERE Id = ?",
+      [req.params.id]
+    );
 
-    // First delete existing services for this payment
-    await db.query("DELETE FROM paymentdetails WHERE PaymentId = ?", [
-      paymentId,
-    ]);
-
-    // Insert new services
-    for (const service of services) {
-      await db.query(
-        "INSERT INTO paymentdetails (PaymentId, ServiceId, Price) VALUES (?, ?, ?)",
-        [paymentId, service.id, service.price]
-      );
+    if (details.length === 0) {
+      return res.status(404).json({ message: "Payment details not found" });
     }
 
-    res.status(200).json({ message: "Services saved successfully" });
-  } catch (err) {
-    console.error("Error saving payment details:", err);
-    res.status(500).json({ error: "Failed to save services" });
+    res.json(details[0]);
+  } catch (error) {
+    console.error("Error fetching payment details:", error);
+    res.status(500).json({ message: "Error fetching payment details" });
   }
 });
 

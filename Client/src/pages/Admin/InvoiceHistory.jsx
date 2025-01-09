@@ -2,6 +2,7 @@ import { Search, Filter } from "lucide-react";
 import { useState, useEffect } from "react";
 import ClickableTable from "../../components/Global/ClickableTable";
 import ConfirmationModal from "../../components/Global/ConfirmationModal";
+import ReceiptModal from "../../pages/Admin/ReceiptModal";
 
 const InvoiceHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -9,6 +10,8 @@ const InvoiceHistory = () => {
   const [invoiceToArchive, setInvoiceToArchive] = useState(null);
   const [showArchived, setShowArchived] = useState(false);
   const [invoices, setInvoices] = useState([]);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -85,6 +88,11 @@ const InvoiceHistory = () => {
     }
   };
 
+  const handleRowClick = (invoiceDetails) => {
+    setSelectedInvoice(invoiceDetails);
+    setShowReceiptModal(true);
+  };
+
   return (
     <div className="p-8">
       {/* Search and Filters */}
@@ -122,6 +130,7 @@ const InvoiceHistory = () => {
         columns={columns}
         data={invoices}
         onArchive={handleArchiveClick}
+        onRowClick={handleRowClick}
       />
 
       <ConfirmationModal
@@ -131,6 +140,13 @@ const InvoiceHistory = () => {
         message="Are you sure you want to archive this receipt?"
         cancelButtonText="Cancel"
         confirmButtonText="Archive"
+      />
+
+      <ReceiptModal
+        isOpen={showReceiptModal}
+        onClose={() => setShowReceiptModal(false)}
+        invoiceId={selectedInvoice?.id}
+        paymentData={selectedInvoice}
       />
     </div>
   );

@@ -1,13 +1,9 @@
 import PropTypes from "prop-types";
 import { Archive } from "lucide-react";
 import { useState } from "react";
-import ReceiptModal from "../../pages/Admin/ReceiptModal";
 
-function ClickableTable({ columns, data, onArchive }) {
+function ClickableTable({ columns, data, onArchive, onRowClick }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const [selectedInvoiceData, setSelectedInvoiceData] = useState(null);
   const itemsPerPage = 7;
 
   const handleRowClick = async (invoice) => {
@@ -19,33 +15,47 @@ function ClickableTable({ columns, data, onArchive }) {
       const invoiceData = await invoiceResponse.json();
       const paymentId = invoiceData.payment_id;
 
-      // Get payment details using payment_id
-      const detailsResponse = await fetch(
-        `http://localhost:3000/api/paymentdetails/${paymentId}`
-      );
-      const detailsData = await detailsResponse.json();
-
       // Get payment info using payment_id
       const paymentResponse = await fetch(
-        `http://localhost:3000/api/payments/${paymentId}`
+        `http://localhost:3000/api/payment/${paymentId}`
       );
       const paymentData = await paymentResponse.json();
 
-      setSelectedInvoiceData({
+      // Get payment details (services) using payment_id
+      const detailsResponse = await fetch(
+        `http://localhost:3000/api/paymentdetails/bypayment/${paymentId}`
+      );
+      const detailsData = await detailsResponse.json();
+
+      const invoiceDetails = {
+        ...invoice,
         services: detailsData.map((service) => ({
-          name: service.ServiceName,
-          price: parseFloat(service.ServicePrice),
+          name: service.ServiceId,
+          price: parseFloat(service.Price),
         })),
-        beautyTech: paymentData.beautytech,
-        totalAmount: parseFloat(paymentData.totalamount),
-        additionalFee: parseFloat(paymentData.additionalfee || 0),
-        amountPaid: parseFloat(paymentData.amountpaid),
-        change: parseFloat(paymentData.changegiven),
-      });
-      setSelectedInvoice(invoice);
-      setShowModal(true);
+        beautyTech: paymentData.BeautyTech,
+        totalAmount: parseFloat(paymentData.TotalAmount),
+        additionalFee: parseFloat(paymentData.AdditionalFee || 0),
+        amountPaid: parseFloat(paymentData.AmountPaid),
+        change: parseFloat(paymentData.ChangeGiven),
+        customerName: paymentData.CustomerName,
+        chairNumber: paymentData.ChairNumber,
+      };
+
+      console.log("Payment Data:", paymentData);
+      console.log("Invoice Details:", invoiceDetails);
+
+      // Call the parent's onRowClick with all the data
+      if (onRowClick) {
+        onRowClick(invoiceDetails);
+      }
     } catch (error) {
       console.error("Error fetching payment details:", error);
+      // Add more detailed error logging
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+      }
     }
   };
 
@@ -130,13 +140,6 @@ function ClickableTable({ columns, data, onArchive }) {
           ))}
         </div>
       )}
-
-      <ReceiptModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        invoiceId={selectedInvoice?.id}
-        paymentData={selectedInvoiceData}
-      />
     </div>
   );
 }
