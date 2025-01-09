@@ -10,15 +10,17 @@ import EditServiceModal from "../../components/Admin/EditServiceModal";
 
 const Services = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false);
   const [servicesOffer, setServicesOffer] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState(null);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
+  const [modals, setModals] = useState({
+    addService: false,
+    editService: false,
+    confirmDelete: false,
+  });
 
   const API_URL = "http://localhost:3000/api/service";
 
@@ -43,16 +45,18 @@ const Services = () => {
     fetchServices();
   }, []);
 
-  const handleAddService = () => setShowModal(true);
-  const handleModalClose = () => setShowModal(false);
+  const toggleModal = (key, value) => {
+    setModals((prev) => ({ ...prev, [key]: value }));
+  };
 
+  const handleAddService = () => toggleModal("addService", true);
   const handleServiceAdded = async () => {
     await fetchServices(); // Refresh the services list
   };
 
   const handleDelete = async (service) => {
     setServiceToDelete(service);
-    setIsConfirmModalOpen(true);
+    toggleModal("confirmDelete", true);
   };
 
   const handleConfirmDelete = async () => {
@@ -83,7 +87,7 @@ const Services = () => {
       console.error("Error updating service:", err);
       setError(`Update failed: ${err.message}`);
     } finally {
-      setIsConfirmModalOpen(false);
+      toggleModal("confirmDelete", false);
       setServiceToDelete(null);
     }
   };
@@ -104,7 +108,7 @@ const Services = () => {
 
   const handleEdit = (service) => {
     setSelectedService(service);
-    setIsEditModalOpen(true);
+    toggleModal("editService", true);
   };
 
   const columns = [
@@ -140,8 +144,8 @@ const Services = () => {
   );
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      {isConfirmModalOpen && (
+    <div className="p-8 ">
+      {modals.confirmDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-30 z-40"></div>
       )}
       {error && <p className="text-red-500">Error: {error}</p>}
@@ -163,17 +167,17 @@ const Services = () => {
         </>
       )}
 
-      {showModal && (
+      {modals.addService && (
         <AddServiceModal
-          onClose={handleModalClose}
+          onClose={() => toggleModal("addService", false)}
           onServiceAdded={handleServiceAdded}
         />
       )}
 
       <ConfirmationModal
-        isOpen={isConfirmModalOpen}
+        isOpen={modals.confirmDelete}
         onClose={() => {
-          setIsConfirmModalOpen(false);
+          toggleModal("confirmDelete", false);
           setServiceToDelete(null);
         }}
         onConfirm={handleConfirmDelete}
@@ -190,10 +194,10 @@ const Services = () => {
         />
       )}
 
-      {isEditModalOpen && (
+      {modals.editService && (
         <EditServiceModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          isOpen={modals.editService}
+          onClose={() => toggleModal("editService", false)}
           service={selectedService}
           onServiceEdited={handleServiceEdited}
           initialData={selectedService}
