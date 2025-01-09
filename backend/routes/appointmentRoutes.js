@@ -381,4 +381,26 @@ router.get("/details/:id", async (req, res) => {
   }
 });
 
+// Add this new endpoint to get today's appointment count
+router.get("/count/today", async (req, res) => {
+  try {
+    const today = new Date().toISOString().split("T")[0];
+
+    const [result] = await db.query(
+      `SELECT COUNT(*) as count 
+       FROM appointments 
+       WHERE appointment_date = ?`,
+      [today]
+    );
+
+    res.json({ count: result[0].count });
+  } catch (err) {
+    console.error("Error counting today's appointments:", err);
+    res.status(500).json({
+      error: "Failed to count appointments",
+      details: err.message,
+    });
+  }
+});
+
 module.exports = router;

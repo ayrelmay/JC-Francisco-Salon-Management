@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 
-// Route to fetch all revenue records
-router.get("/revenue", async (req, res) => {
+// GET route to fetch current revenue data
+router.get("/", async (req, res) => {
   try {
     const [rows] = await db.query(
       "SELECT * FROM revenue ORDER BY date DESC LIMIT 1"
@@ -11,65 +11,95 @@ router.get("/revenue", async (req, res) => {
     res.json(
       rows[0] || {
         opening_amount: "0.00",
-        revenue: "0.00",
+        daily_revenue: "0.00",
         closing_amount: "0.00",
-        customers: "0",
+        transaction_id: null,
       }
     );
   } catch (error) {
-    console.error(error);
+    console.error("GET route error:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-// Route to reset daily values at midnight
-router.post("/reset-daily", async (req, res) => {
+// PUT route to update revenue data
+router.put("/", async (req, res) => {
   try {
+    const {
+      opening_amount, // Changed from opening_balance
+      daily_revenue, // Changed from revenue
+      closing_amount, // Changed from closing_balance
+      transaction_id,
+    } = req.body;
+
     const today = new Date().toISOString().split("T")[0];
-    await db.query(
-      `INSERT INTO revenue (date, opening_balance, revenue, closing, customers) 
-       VALUES (?, '0.00', '0.00', '0.00', '0')`,
+
+    // First check for existing record
+    const [existingRecords] = await db.query(
+      "SELECT id FROM revenue WHERE date = ?",
       [today]
     );
-    res.json({ message: "Values reset successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-});
 
-// Route to update opening balance
-router.put("/revenue/opening", async (req, res) => {
-  try {
-    const { opening_balance, transaction_id } = req.body;
-    const today = new Date().toISOString().split("T")[0];
+    let query;
+    let params;
 
-    // Insert or update the opening amount
-    await db.query(
-      `INSERT INTO revenue (transaction_id, date, opening_amount) 
-       VALUES (?, ?, ?)
-       ON DUPLICATE KEY UPDATE opening_amount = ?`,
-      [transaction_id, today, opening_balance, opening_balance]
-    );
+    if (existingRecords.length === 0) {
+      query = `
+        INSERT INTO revenue 
+        (transaction_id, date, opening_amount, daily_revenue, closing_amount) 
+        VALUES (?, ?, ?, ?, ?)
+      `;
+      params = [
+        transaction_id,
+        today,
+        opening_amount,
+        daily_revenue,
+        closing_amount,
+      ];
+    } else {
+      query = `
+        UPDATE revenue 
+        SET 
+          opening_amount = ?,
+          daily_revenue = ?,
+          closing_amount = ?,
+          transaction_id = ?
+        WHERE date = ?
+      `;
+      params = [
+        opening_amount,
+        daily_revenue,
+        closing_amount,
+        transaction_id,
+        today,
+      ];
+    }
+
+    const [result] = await db.query(query, params);
+
+    if (result.affectedRows === 0) {
+      throw new Error("No rows were affected");
+    }
 
     res.json({
-      message: "Opening balance updated successfully",
-      transaction_id,
+      success: true,
+      message:
+        existingRecords.length === 0 ? "New record created" : "Record updated",
+      data: {
+        transaction_id,
+        opening_amount,
+        daily_revenue,
+        closing_amount,
+        date: today,
+      },
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-});
-
-// Route to fetch all revenue records
-router.get("/revenue/all", async (req, res) => {
-  try {
-    const [rows] = await db.query("SELECT * FROM revenue ORDER BY date DESC");
-    res.json(rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error("Database error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to save values",
+      error: error.message,
+    });
   }
 });
 

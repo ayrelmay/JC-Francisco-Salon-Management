@@ -7,80 +7,94 @@ import { HandCoins, SunMedium, Moon, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function Dashboard() {
-  const [openingBalance, setOpeningBalance] = useState("0.00");
-  const [revenue, setRevenue] = useState("0.00");
-  const [closing, setClosing] = useState("0.00");
+  const [openingAmount, setOpeningAmount] = useState("0.00");
+  const [dailyRevenue, setDailyRevenue] = useState("0.00");
+  const [closingAmount, setClosingAmount] = useState("0.00");
   const [customers, setCustomers] = useState("0");
 
   useEffect(() => {
     // Function to fetch values from backend
     const fetchValues = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/revenue");
-        const data = await response.json();
-        setOpeningBalance(data.opening_balance);
-        setRevenue(data.revenue);
-        setClosing(data.closing);
-        setCustomers(data.customers);
+        // Fetch revenue data
+        const revenueResponse = await fetch(
+          "http://localhost:3000/api/revenue"
+        );
+        const revenueData = await revenueResponse.json();
+
+        // Fetch today's appointment count
+        const appointmentResponse = await fetch(
+          "http://localhost:3000/api/appointments/count/today"
+        );
+        const appointmentData = await appointmentResponse.json();
+
+        // Update all states
+        setOpeningAmount(revenueData.opening_amount || "0.00");
+        setDailyRevenue(revenueData.daily_revenue || "0.00");
+        setClosingAmount(revenueData.closing_amount || "0.00");
+        setCustomers(appointmentData.count.toString());
       } catch (error) {
         console.error("Error fetching values:", error);
       }
     };
 
-    // Function to check if it's midnight and trigger reset
-    const checkAndResetValues = async () => {
-      const now = new Date();
-      if (now.getHours() === 0 && now.getMinutes() === 0) {
-        try {
-          await fetch("/api/reset-daily", { method: "POST" });
-          fetchValues(); // Fetch new values after reset
-        } catch (error) {
-          console.error("Error resetting values:", error);
-        }
-      }
-    };
-
-    // Initial fetch
     fetchValues();
 
-    // Check every minute
-    const interval = setInterval(checkAndResetValues, 60000);
-
-    // Cleanup interval on component unmount
+    // Check every minute for updates
+    const interval = setInterval(fetchValues, 60000);
     return () => clearInterval(interval);
   }, []);
 
   const handleOpeningChange = async (newValue, event) => {
-    // Only proceed if Enter key is pressed
-    if (event && event.key !== "Enter") {
-      return;
-    }
-
-    // Remove the ₱ symbol and any other non-numeric characters except decimal point
-    const numericValue = newValue.replace(/[^0-9.]/g, "");
-    setOpeningBalance(numericValue);
-
-    // Generate ID based on current date (MMDDYY format)
-    const now = new Date();
-    const id = `${(now.getMonth() + 1).toString().padStart(2, "0")}${now
-      .getDate()
-      .toString()
-      .padStart(2, "0")}${now.getFullYear().toString().slice(-2)}`;
+    if (event.key !== "Enter") return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/revenue`, {
+      // Remove ₱ and convert to number
+      const openingValue = parseFloat(newValue.replace(/[^0-9.-]/g, ""));
+      if (isNaN(openingValue)) {
+        throw new Error("Please enter a valid number");
+      }
+
+      const currentRevenue = parseFloat(dailyRevenue);
+      const currentClosing = parseFloat(closingAmount);
+
+      // Calculate new values
+      const newRevenue = (currentRevenue - openingValue).toFixed(2);
+      const newClosing = (currentClosing + openingValue).toFixed(2);
+
+      // Generate transaction ID (YYYYMMDD)
+      const now = new Date();
+      const transactionId =
+        now.getFullYear().toString() +
+        (now.getMonth() + 1).toString().padStart(2, "0") +
+        now.getDate().toString().padStart(2, "0");
+
+      // Save to database
+      const response = await fetch("http://localhost:3000/api/revenue", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          opening_balance: numericValue,
-          transaction_id: id,
+          opening_amount: openingValue.toFixed(2),
+          daily_revenue: newRevenue,
+          closing_amount: newClosing,
+          transaction_id: transactionId,
         }),
       });
-      console.log("Response received:", response);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to save to database");
+      }
+
+      // Update state after successful save
+      setOpeningAmount(openingValue.toFixed(2));
+      setDailyRevenue(newRevenue);
+      setClosingAmount(newClosing);
     } catch (error) {
-      console.error("Error updating opening balance:", error);
+      console.error("Error:", error);
+      alert(error.message || "Failed to save values. Please try again.");
     }
   };
 
@@ -91,21 +105,20 @@ export default function Dashboard() {
         <div className="w-full mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
             title="Revenue"
-            value={`₱${revenue}`}
+            value={`₱${dailyRevenue}`}
             icon={<HandCoins />}
             editable={false}
           />
           <MetricCard
             title="Opening"
-            value={`₱${openingBalance}`}
+            value={`₱${openingAmount}`}
             icon={<SunMedium />}
             editable={true}
             onChange={handleOpeningChange}
-            onKeyPress={true}
           />
           <MetricCard
             title="Closing"
-            value={`₱${closing}`}
+            value={`₱${closingAmount}`}
             icon={<Moon />}
             editable={false}
           />
@@ -118,16 +131,10 @@ export default function Dashboard() {
         </div>
 
         {/* Charts and Tables Grid */}
-        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 ">
-          {/* Revenue Chart */}
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Chart />
-          {/* Appointments Table */}
           <DashAptTable />
-
-          {/* Employee's Login */}
           <DashEmpLog />
-
-          {/* Inventory Overview */}
           <DashInventory />
         </div>
       </div>
