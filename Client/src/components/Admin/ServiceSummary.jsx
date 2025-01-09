@@ -27,18 +27,6 @@ export default function ServiceSummary({
   // Add new state for technicians
   const [technicians, setTechnicians] = useState([]);
 
-  // Update local state when paymentDetails prop changes
-  useEffect(() => {
-    if (paymentDetails) {
-      setLocalPaymentDetails({
-        CustomerName: paymentDetails.CustomerName || "",
-        BeautyTech: paymentDetails.BeautyTech || "",
-        ChairNumber: paymentDetails.ChairNumber || "",
-        Status: paymentDetails.Status || "",
-      });
-    }
-  }, [paymentDetails]);
-
   // Add useEffect to fetch technicians
   useEffect(() => {
     const fetchTechnicians = async () => {
@@ -368,11 +356,7 @@ export default function ServiceSummary({
           <input
             type="text"
             inputMode="numeric"
-            value={
-              additionalFee === 0
-                ? ""
-                : Math.round(additionalFee).toLocaleString()
-            }
+            value={additionalFee || ""}
             onChange={(e) => {
               const value = e.target.value.replace(/[^\d]/g, "");
               onAdditionalFeeChange(value === "" ? 0 : parseInt(value));
@@ -392,7 +376,7 @@ export default function ServiceSummary({
             type="text"
             inputMode="numeric"
             value={
-              amountPaid === 0 ? "" : Math.round(amountPaid).toLocaleString()
+              amountPaid ? Math.round(amountPaid).toLocaleString() : amountPaid
             }
             onChange={(e) => {
               const value = e.target.value.replace(/[^\d]/g, "");
