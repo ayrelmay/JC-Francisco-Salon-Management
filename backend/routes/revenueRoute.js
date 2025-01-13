@@ -3,17 +3,22 @@ const router = express.Router();
 const db = require("../db");
 
 // GET route to fetch current revenue data
+// backend/routes/revenueRoute.js
 router.get("/", async (req, res) => {
   try {
-    const [rows] = await db.query(
-      "SELECT * FROM revenue ORDER BY date DESC LIMIT 1"
-    );
+    const today = new Date().toISOString().split("T")[0];
+    const [rows] = await db.query("SELECT * FROM revenue WHERE date = ?", [
+      today,
+    ]);
+
     res.json(
       rows[0] || {
         opening_amount: "0.00",
         daily_revenue: "0.00",
         closing_amount: "0.00",
+        customer_count: 0,
         transaction_id: null,
+        date: today,
       }
     );
   } catch (error) {
@@ -26,9 +31,10 @@ router.get("/", async (req, res) => {
 router.put("/", async (req, res) => {
   try {
     const {
-      opening_amount, // Changed from opening_balance
-      daily_revenue, // Changed from revenue
-      closing_amount, // Changed from closing_balance
+      opening_amount,
+      daily_revenue,
+      closing_amount,
+      customer_count,
       transaction_id,
     } = req.body;
 
@@ -46,8 +52,8 @@ router.put("/", async (req, res) => {
     if (existingRecords.length === 0) {
       query = `
         INSERT INTO revenue 
-        (transaction_id, date, opening_amount, daily_revenue, closing_amount) 
-        VALUES (?, ?, ?, ?, ?)
+        (transaction_id, date, opening_amount, daily_revenue, closing_amount, customer_count) 
+        VALUES (?, ?, ?, ?, ?, ?)
       `;
       params = [
         transaction_id,
@@ -55,6 +61,7 @@ router.put("/", async (req, res) => {
         opening_amount,
         daily_revenue,
         closing_amount,
+        customer_count,
       ];
     } else {
       query = `
@@ -63,6 +70,7 @@ router.put("/", async (req, res) => {
           opening_amount = ?,
           daily_revenue = ?,
           closing_amount = ?,
+          customer_count = ?,
           transaction_id = ?
         WHERE date = ?
       `;
@@ -70,6 +78,7 @@ router.put("/", async (req, res) => {
         opening_amount,
         daily_revenue,
         closing_amount,
+        customer_count,
         transaction_id,
         today,
       ];
@@ -90,6 +99,7 @@ router.put("/", async (req, res) => {
         opening_amount,
         daily_revenue,
         closing_amount,
+        customer_count,
         date: today,
       },
     });

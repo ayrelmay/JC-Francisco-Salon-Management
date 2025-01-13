@@ -2,28 +2,39 @@ import Card from "./Card";
 import PropTypes from "prop-types";
 import { useState } from "react";
 
-function MetricCard({ title, value, icon, editable, onChange }) {
+function MetricCard({ title, value, icon, editable, onChange, hasData }) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(value.replace("₱", ""));
+  const [editValue, setEditValue] = useState(
+    typeof value === "string" ? value.replace(/[^0-9.-]/g, "") : value
+  );
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
-      setIsEditing(false);
-      onChange(editValue, e);
+      const numericValue = parseFloat(editValue);
+      if (!isNaN(numericValue)) {
+        setIsEditing(false);
+        onChange(numericValue, e);
+      } else {
+        alert("Please enter a valid number");
+      }
     }
   };
 
   const handleBlur = () => {
     setIsEditing(false);
-    setEditValue(value.replace("₱", ""));
+    setEditValue(
+      typeof value === "string" ? value.replace(/[^0-9.-]/g, "") : value
+    );
   };
 
   const handleClick = () => {
-    if (editable) {
+    if (editable && (hasData || title === "Opening")) {
       setIsEditing(true);
       setEditValue(value.replace("₱", ""));
     }
   };
+
+  const displayValue = hasData ? value : "No data";
 
   return (
     <Card>
@@ -42,12 +53,16 @@ function MetricCard({ title, value, icon, editable, onChange }) {
             />
           ) : (
             <div
-              className={`my-2 text-xl text-left font-semibold text-FontPrimary ${
-                editable ? "cursor-pointer" : ""
+              className={`my-2 text-xl text-left font-semibold ${
+                hasData ? "text-FontPrimary" : "text-gray-400"
+              } ${
+                editable && (hasData || title === "Opening")
+                  ? "cursor-pointer"
+                  : ""
               }`}
               onClick={handleClick}
             >
-              {value}
+              {displayValue}
             </div>
           )}
         </div>
@@ -65,11 +80,13 @@ MetricCard.propTypes = {
   onChange: PropTypes.func,
   icon: PropTypes.node.isRequired,
   editable: PropTypes.bool,
+  hasData: PropTypes.bool,
 };
 
 MetricCard.defaultProps = {
   editable: false,
   onChange: () => {},
+  hasData: false,
 };
 
 export default MetricCard;
